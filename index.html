@@ -7,90 +7,113 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      max-width: 880px;
+      max-width: 860px;
       margin: auto;
       padding: 18px;
       font-size: 14px;
+      background: #fff;
     }
 
     h2 {
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     label.section {
       font-weight: bold;
-      margin-top: 10px;
+      margin-top: 12px;
       display: block;
     }
 
     input, select, textarea {
-      width: 100%;
-      padding: 5px;
-      margin-top: 3px;
+      padding: 6px;
+      margin-top: 4px;
       font-size: 13px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    input, textarea {
+      width: 100%;
     }
 
     textarea {
       min-height: 80px;
+      resize: vertical;
     }
 
-    /* Compact radio buttons with icons */
+    select {
+      max-width: 260px;
+    }
+
+    /* Radios with icons */
     .radio-group {
       display: flex;
-      gap: 12px;
-      margin-top: 4px;
+      gap: 16px;
+      margin-top: 6px;
     }
 
     .radio-group label {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       cursor: pointer;
-      font-weight: normal;
     }
 
-    .radio-group input {
-      margin: 0;
-    }
+    .yes { color: green; font-weight: bold; }
+    .no { color: red; font-weight: bold; }
 
-    .yes-icon { color: green; font-weight: bold; }
-    .no-icon { color: red; font-weight: bold; }
-
+    /* Config rows */
     .config-row {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr auto;
-      gap: 8px;
-      margin-top: 6px;
+      display: flex;
+      gap: 10px;
       align-items: center;
+      margin-top: 8px;
     }
 
-    button {
-      margin-top: 10px;
-      padding: 5px 10px;
-      font-size: 13px;
-      cursor: pointer;
+    .config-row input {
+      flex: 1;
+    }
+
+    .config-row select {
+      width: 110px;
     }
 
     .remove-btn {
-      background: #eee;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
       border: 1px solid #ccc;
-      padding: 3px 8px;
+      background: #f5f5f5;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    /* Summary preview */
-    .preview {
-      margin-top: 16px;
-      padding: 10px;
-      border: 1px solid #ddd;
-      background: #fafafa;
-      font-size: 12px;
-      white-space: pre-wrap;
+    .remove-btn:hover {
+      background: #e0e0e0;
     }
 
-    .preview-title {
-      font-weight: bold;
-      margin-bottom: 6px;
+    button {
+      margin-top: 12px;
+      padding: 6px 12px;
       font-size: 13px;
+      cursor: pointer;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      background: #f7f7f7;
+    }
+
+    button:hover {
+      background: #ededed;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
     }
   </style>
 </head>
@@ -99,16 +122,23 @@
 <h2>Note Takers</h2>
 
 <label class="section">Integration Type</label>
-<select id="integrationType"></select>
+<select id="integrationType">
+  <option>OCS Integration</option>
+  <option>OpenDental API Integration</option>
+  <option>Denticon Integration</option>
+  <option>NexHealth Integration</option>
+  <option>Sikka Integration</option>
+</select>
 
 <label class="section">Contact Name</label>
-<input id="contactName" />
+<input id="contactName">
 
 <label class="section">Phone Number</label>
-<input id="phoneNumber" />
+<input id="phoneNumber">
 
 <label class="section">Integration Status</label>
 <select id="integrationStatus">
+  <option value="" selected disabled>Select status</option>
   <option>Pending</option>
   <option>Active</option>
   <option>Stalled</option>
@@ -116,14 +146,14 @@
 
 <label class="section">Server Access</label>
 <div class="radio-group">
-  <label><input type="radio" name="serverAccess" value="Yes"><span class="yes-icon">✔</span>Yes</label>
-  <label><input type="radio" name="serverAccess" value="No"><span class="no-icon">✖</span>No</label>
+  <label><input type="radio" name="serverAccess" value="Yes"><span class="yes">✔</span>Yes</label>
+  <label><input type="radio" name="serverAccess" value="No"><span class="no">✖</span>No</label>
 </div>
 
 <label class="section">Calendar Sync Configured</label>
 <div class="radio-group">
-  <label><input type="radio" name="calendarSync" value="Yes"><span class="yes-icon">✔</span>Yes</label>
-  <label><input type="radio" name="calendarSync" value="No"><span class="no-icon">✖</span>No</label>
+  <label><input type="radio" name="calendarSync" value="Yes"><span class="yes">✔</span>Yes</label>
+  <label><input type="radio" name="calendarSync" value="No"><span class="no">✖</span>No</label>
 </div>
 
 <label class="section">Configs / Operatory Setup</label>
@@ -136,31 +166,13 @@
 <label class="section">Setup Summary</label>
 <textarea id="setupSummary" placeholder="- Calendar sync completed"></textarea>
 
-<button id="gptFixBtn">Fix Grammar</button>
-<button id="copyBtn">Copy Full Note</button>
-
-<!-- LIVE PREVIEW -->
-<div class="preview">
-  <div class="preview-title">Live Summary Preview</div>
-  <div id="previewContent"></div>
+<div class="actions">
+  <button id="gptFixBtn">Fix Grammar</button>
+  <button id="copyBtn">Copy to Clipboard</button>
 </div>
 
 <script>
 const BACKEND_URL = "https://notes-backend-yheh.onrender.com";
-
-/* Integration dropdown */
-const integrationOptions = [
-  "OCS Integration",
-  "OpenDental API Integration",
-  "Denticon Integration",
-  "NexHealth Integration",
-  "Sikka Integration"
-];
-integrationOptions.forEach(o => {
-  const opt = document.createElement("option");
-  opt.textContent = o;
-  integrationType.appendChild(opt);
-});
 
 /* Duration dropdown */
 function createDurationDropdown() {
@@ -171,17 +183,17 @@ function createDurationDropdown() {
   return `<select>${options}</select>`;
 }
 
-/* Add config row */
+/* Add operatory */
 function addConfig() {
   const row = document.createElement("div");
   row.className = "config-row";
   row.innerHTML = `
     <input placeholder="Column / Operatory">
     ${createDurationDropdown()}
-    <button class="remove-btn" onclick="this.parentElement.remove()">✕</button>
+    <button class="remove-btn" title="Remove">✕</button>
   `;
+  row.querySelector(".remove-btn").onclick = () => row.remove();
   configsContainer.appendChild(row);
-  updatePreview();
 }
 addConfig();
 
@@ -200,7 +212,6 @@ setupSummary.addEventListener("blur", () => {
     .filter(Boolean)
     .map(l => l.startsWith("-") ? l : `- ${l}`)
     .join("\n");
-  updatePreview();
 });
 
 /* GPT Fix */
@@ -213,11 +224,10 @@ gptFixBtn.onclick = async () => {
   });
   const data = await res.json();
   setupSummary.value = data.cleaned;
-  updatePreview();
 };
 
-/* Build note */
-function buildNote() {
+/* Copy */
+copyBtn.onclick = async () => {
   const serverAccess = document.querySelector('input[name="serverAccess"]:checked')?.value || "Not set";
   const calendarSync = document.querySelector('input[name="calendarSync"]:checked')?.value || "Not set";
 
@@ -227,12 +237,12 @@ function buildNote() {
       return `- ${op.value} | ${dur.value}`;
     }).join("\n");
 
-  return `
+  const note = `
 ${integrationType.value}
 
 Contact Name: ${contactName.value}
 Phone Number: ${phoneNumber.value}
-Integration Status: ${integrationStatus.value}
+Integration Status: ${integrationStatus.value || "Not set"}
 
 Server Access: ${serverAccess}
 Calendar Sync Configured: ${calendarSync}
@@ -246,18 +256,9 @@ ${blocker.value}
 Setup Summary:
 ${setupSummary.value}
 `.trim();
-}
 
-/* Live preview */
-function updatePreview() {
-  previewContent.textContent = buildNote();
-}
-document.addEventListener("input", updatePreview);
-
-/* Copy */
-copyBtn.onclick = async () => {
-  await navigator.clipboard.writeText(buildNote());
-  alert("Full note copied!");
+  await navigator.clipboard.writeText(note);
+  alert("Copied to clipboard");
 };
 </script>
 
