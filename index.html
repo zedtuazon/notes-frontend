@@ -31,14 +31,14 @@
     /* ---------- Header ---------- */
     .header {
       display: flex;
-      justify-content: center;  /* centered horizontally */
+      justify-content: center;  
       align-items: center;
       gap: 10px;
-      font-size: 28px;         /* increased font size */
+      font-size: 28px;        
       font-weight: bold;
       margin-bottom: 16px;
     }
-    .header span.icon { font-size: 32px; } /* slightly bigger icon */
+    .header span.icon { font-size: 32px; }
   </style>
 </head>
 <body>
@@ -46,6 +46,9 @@
 <div class="header">
   <span class="icon">📝</span> EZ Note Generator
 </div>
+
+<label class="section">Practice Name</label>
+<input id="practiceName" placeholder="Enter Practice Name (for file name only)">
 
 <label class="section">Integration Type</label>
 <select id="integrationType">
@@ -97,14 +100,13 @@
 <div class="actions">
   <button id="gptFixBtn">✏️ Fix Grammar</button>
   <button id="copyBtn" disabled>📋 Copy to Clipboard</button>
+  <button id="saveFileBtn">💾 Save to File</button>
 </div>
 <button style="margin-top: 10px;" onclick="clearAll()">🧹 Clear All</button>
 
 <script>
 const BACKEND_URL = "https://notes-backend-yheh.onrender.com";
 const configsContainer = document.getElementById("configsContainer");
-const addBtn = document.getElementById("addOperatoryBtn");
-const copyBtn = document.getElementById("copyBtn");
 
 /* Duration dropdown */
 function durationDropdown(){
@@ -239,6 +241,26 @@ gptFixBtn.onclick=async()=>{
 
 /* Copy note */
 copyBtn.onclick = async () => {
+  const noteText = generateCurrentNote();
+  await navigator.clipboard.writeText(noteText);
+  alert("Copied to clipboard");
+};
+
+/* Save to File - placeholder logic, file name from Practice Name */
+saveFileBtn.onclick = () => {
+  const noteText = generateCurrentNote();
+  const practiceName = document.getElementById("practiceName").value || "EZ_Note";
+  const blob = new Blob([noteText], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = practiceName.replace(/[^a-z0-9]/gi, "_") + ".txt";
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+/* Generate note content */
+function generateCurrentNote(){
   const integrationTypeVal = integrationType.value || "Not selected";
   const integrationStatusVal = integrationStatus.value || "Not set";
   const serverAccessVal = document.querySelector('input[name="serverAccess"]:checked')?.value || "Not set";
@@ -287,9 +309,8 @@ Setup Summary:
 ${setupSummary.value}
 `.trim();
 
-  await navigator.clipboard.writeText(note);
-  alert("Copied to clipboard");
-};
+  return note;
+}
 
 /* Validation for required fields */
 function validateFields() {
@@ -300,7 +321,7 @@ function validateFields() {
 
   let configsFilled = false;
   if(calendarSyncVal === "No"){
-    configsFilled = true; // - N/A counts as filled
+    configsFilled = true;
   } else {
     const rows = [...document.querySelectorAll(".config-row")];
     configsFilled = rows.length > 0 && rows.every(r=>{
@@ -324,6 +345,5 @@ configsContainer.addEventListener("change", validateFields);
 addConfig();
 validateFields();
 </script>
-
 </body>
 </html>
