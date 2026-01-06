@@ -71,17 +71,21 @@
     /* Config rows */
     .config-row {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
       margin-top: 8px;
     }
 
     .config-row input {
-      width: 50%;
+      width: 40%;
     }
 
-    .config-row select {
-      width: 110px;
+    .config-row select.duration {
+      width: 100px;
+    }
+
+    .config-row select.strategy {
+      width: 140px;
     }
 
     .remove-btn {
@@ -181,21 +185,34 @@
 const BACKEND_URL = "https://notes-backend-yheh.onrender.com";
 
 /* Duration dropdown */
-function createDurationDropdown() {
-  let options = `<option value="">Duration</option>`;
+function durationDropdown() {
+  let html = `<select class="duration"><option value="">Duration</option>`;
   for (let i = 5; i <= 120; i += 5) {
-    options += `<option>${i} mins</option>`;
+    html += `<option>${i} mins</option>`;
   }
-  return `<select>${options}</select>`;
+  html += `</select>`;
+  return html;
 }
 
-/* Add operatory */
+/* Strategy dropdown */
+function strategyDropdown() {
+  return `
+    <select class="strategy">
+      <option value="Any Room">Any Room</option>
+      <option value="All Rooms">All Rooms</option>
+      <option value="Sequential">Sequential</option>
+    </select>
+  `;
+}
+
+/* Add operatory row */
 function addConfig() {
   const row = document.createElement("div");
   row.className = "config-row";
   row.innerHTML = `
     <input placeholder="Column / Operatory">
-    ${createDurationDropdown()}
+    ${durationDropdown()}
+    ${strategyDropdown()}
     <button class="remove-btn">✕</button>
   `;
   row.querySelector(".remove-btn").onclick = () => row.remove();
@@ -209,10 +226,8 @@ function clearAll() {
     if (i.type === "radio") i.checked = false;
     else i.value = "";
   });
-
   document.querySelectorAll("textarea").forEach(t => t.value = "");
   document.querySelectorAll("select").forEach(s => s.selectedIndex = 0);
-
   configsContainer.innerHTML = "";
   addConfig();
 }
@@ -251,11 +266,24 @@ copyBtn.onclick = async () => {
   const serverAccess = document.querySelector('input[name="serverAccess"]:checked')?.value || "Not set";
   const calendarSync = document.querySelector('input[name="calendarSync"]:checked')?.value || "Not set";
 
-  const configs = [...document.querySelectorAll(".config-row")]
-    .map(r => {
-      const [op, dur] = r.querySelectorAll("input, select");
-      return `- ${op.value} | ${dur.value}`;
-    }).join("\n");
+  const rows = [...document.querySelectorAll(".config-row")];
+  const configs = rows.map((r, i) => {
+    const op = r.querySelector("input").value;
+    const dur = r.querySelector(".duration").value;
+    const strat = r.querySelector(".strategy").value;
+
+    if (strat === "Sequential") {
+      const next = rows[i + 1];
+      if (next) {
+        const nextOp = next.querySelector("input").value;
+        const nextDur = next.querySelector(".duration").value;
+        return `- ${op} | ${dur} → Sequential to ${nextOp} | ${nextDur}`;
+      }
+      return `- ${op} | ${dur} → Sequential (next operatory not set)`;
+    }
+
+    return `- ${op} | ${dur} | ${strat}`;
+  }).join("\n");
 
   const note = `
 ${integrationType.value}
