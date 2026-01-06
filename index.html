@@ -2,10 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Note Takers</title>
+  <title>EZ Note Generator</title>
   <style>
-    body { font-family: Arial; max-width: 860px; margin: auto; padding: 18px; font-size: 14px; }
-    h2 { margin-bottom: 12px; }
+    body { font-family: Arial; max-width: 860px; margin: auto; padding: 18px; font-size: 14px; background:#fdfdfd; }
     label.section { font-weight: bold; margin-top: 12px; display: block; }
     input, select, textarea { padding: 6px; margin-top: 4px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; }
     textarea { min-height: 80px; width: 100%; }
@@ -23,15 +22,21 @@
     .arrow { font-weight: bold; color: #555; margin-left: 5px; margin-right: 5px; }
     .remove-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #ccc; background: #f5f5f5; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
     .remove-btn:hover { background: #e0e0e0; }
-    button { margin-top: 12px; padding: 6px 12px; font-size: 13px; cursor: pointer; border-radius: 4px; border: 1px solid #ccc; background: #f7f7f7; }
-    button:hover { background: #ededed; }
+    button { margin-top: 12px; padding: 6px 12px; font-size: 13px; cursor: pointer; border-radius: 4px; border: 1px solid #ccc; background: #f7f7f7; transition: all 0.2s; display:flex; align-items:center; gap:6px; }
+    button:hover { background: #eaeaea; }
+    button:disabled { background:#f0f0f0; cursor:not-allowed; }
     .actions { display: flex; gap: 10px; margin-top: 14px; }
     .disabled { background: #f0f0f0; pointer-events: none; }
+    /* Header styles */
+    .header { display:flex; align-items:center; gap:10px; background:#f0f8ff; padding:10px 14px; border-radius:8px; font-size:20px; font-weight:bold; margin-bottom:16px; }
+    .header span.icon { font-size:24px; }
   </style>
 </head>
 <body>
 
-<h2>Note Takers</h2>
+<div class="header">
+  <span class="icon">📝</span> EZ Note Generator
+</div>
 
 <label class="section">Integration Type</label>
 <select id="integrationType">
@@ -70,7 +75,7 @@
 
 <label class="section">Configs / Operatory Setup</label>
 <div id="configsContainer"></div>
-<button id="addOperatoryBtn" onclick="addConfig()">+ Add Operatory</button>
+<button id="addOperatoryBtn" onclick="addConfig()">➕ Add Operatory</button>
 
 <label class="section">Blocker</label>
 <textarea id="blocker" placeholder="- "></textarea>
@@ -79,25 +84,24 @@
 <textarea id="setupSummary" placeholder="- Calendar sync completed"></textarea>
 
 <div class="actions">
-  <button id="gptFixBtn">Fix Grammar</button>
-  <button id="copyBtn" disabled>Copy to Clipboard</button>
+  <button id="gptFixBtn">✏️ Fix Grammar</button>
+  <button id="copyBtn" disabled>📋 Copy to Clipboard</button>
 </div>
-<button style="margin-top: 10px;" onclick="clearAll()">Clear All</button>
+<button style="margin-top: 10px;" onclick="clearAll()">🧹 Clear All</button>
 
 <script>
+// ------------------ JS code (same as previous full version) ------------------
 const BACKEND_URL = "https://notes-backend-yheh.onrender.com";
 const configsContainer = document.getElementById("configsContainer");
 const addBtn = document.getElementById("addOperatoryBtn");
 const copyBtn = document.getElementById("copyBtn");
 
-/* Duration dropdown */
 function durationDropdown(){
   let html = `<select class="duration"><option value="">Duration</option>`;
   for(let i=5;i<=120;i+=5) html += `<option>${i} mins</option>`;
   return html + `</select>`;
 }
 
-/* Strategy dropdown */
 function strategyDropdown(){
   return `<select class="strategy">
     <option value="Any Room">Any Room</option>
@@ -106,14 +110,11 @@ function strategyDropdown(){
   </select>`;
 }
 
-/* Add config row */
 function addConfig(isSequentialSecond=false){
   const row = document.createElement("div");
   row.className = "config-row";
-
   const strategyHtml = isSequentialSecond ? "" : strategyDropdown();
   const arrowHtml = isSequentialSecond ? '<span class="arrow">→</span>' : '<span class="arrow" style="display:none;">→</span>';
-
   row.innerHTML = `
     <input placeholder="Column / Operatory">
     ${durationDropdown()}
@@ -121,10 +122,8 @@ function addConfig(isSequentialSecond=false){
     ${arrowHtml}
     <button class="remove-btn">✕</button>
   `;
-
   const strategySelect = row.querySelector(".strategy");
   const arrowSpan = row.querySelector(".arrow");
-
   row.querySelector(".remove-btn").onclick = () => {
     const rows = [...document.querySelectorAll(".config-row")];
     const index = rows.indexOf(row);
@@ -132,7 +131,6 @@ function addConfig(isSequentialSecond=false){
     row.remove();
     validateFields();
   };
-
   if(strategySelect){
     strategySelect.addEventListener("change",()=>{
       const rows=[...document.querySelectorAll(".config-row")];
@@ -147,12 +145,10 @@ function addConfig(isSequentialSecond=false){
       validateFields();
     });
   }
-
   configsContainer.appendChild(row);
   validateFields();
 }
 
-/* Clear all */
 function clearAll(){
   document.querySelectorAll("input").forEach(i=>{
     if(i.type==="radio") i.checked=false; else i.value="";
@@ -165,7 +161,6 @@ function clearAll(){
   validateFields();
 }
 
-/* Auto bullets for blocker */
 blocker.addEventListener("keydown", e=>{
   if(e.key==="Enter"){ e.preventDefault(); blocker.value += "\n- "; }
 });
@@ -175,8 +170,6 @@ blocker.addEventListener("blur", ()=>{
     .map(l=>l.startsWith("-")?l:`- ${l}`).join("\n");
 });
 
-/* Setup Summary - flexible new lines with auto-bullets on blur */
-setupSummary.addEventListener("keydown", e=>{ });
 setupSummary.addEventListener("blur", ()=>{
   setupSummary.value = setupSummary.value
     .split("\n")
@@ -186,7 +179,6 @@ setupSummary.addEventListener("blur", ()=>{
     .join("\n");
 });
 
-/* Enable/Disable configs */
 function enableConfigs(enable){
   document.querySelectorAll(".config-row input, .config-row select").forEach(el=>{
     el.disabled = !enable;
@@ -195,7 +187,6 @@ function enableConfigs(enable){
   addBtn.disabled = !enable;
 }
 
-/* Calendar sync behavior */
 document.querySelectorAll('input[name="calendarSync"]').forEach(r=>{
   r.addEventListener("change", ()=>{
     if(r.value==="No"){
@@ -210,7 +201,6 @@ document.querySelectorAll('input[name="calendarSync"]').forEach(r=>{
   });
 });
 
-/* GPT Fix */
 gptFixBtn.onclick=async()=>{
   if(!setupSummary.value) return;
   const res=await fetch(`${BACKEND_URL}/summary`,{
@@ -222,7 +212,6 @@ gptFixBtn.onclick=async()=>{
   setupSummary.value=data.cleaned;
 };
 
-/* Copy note */
 copyBtn.onclick = async () => {
   const integrationTypeVal = integrationType.value;
   const integrationStatusVal = integrationStatus.value;
@@ -276,7 +265,6 @@ ${setupSummary.value}
   alert("Copied to clipboard");
 };
 
-/* ========== Validation for required fields ========== */
 function validateFields() {
   const integrationTypeVal = integrationType.value;
   const integrationStatusVal = integrationStatus.value;
@@ -299,7 +287,6 @@ function validateFields() {
   copyBtn.disabled = !(integrationTypeVal && integrationStatusVal && serverAccessVal && calendarSyncVal && configsFilled);
 }
 
-/* Add event listeners to revalidate in real-time */
 integrationType.addEventListener("change", validateFields);
 integrationStatus.addEventListener("change", validateFields);
 document.querySelectorAll('input[name="serverAccess"]').forEach(r => r.addEventListener("change", validateFields));
@@ -307,10 +294,8 @@ document.querySelectorAll('input[name="calendarSync"]').forEach(r => r.addEventL
 configsContainer.addEventListener("input", validateFields);
 configsContainer.addEventListener("change", validateFields);
 
-// Initial setup
 addConfig();
 validateFields();
-
 </script>
 </body>
 </html>
