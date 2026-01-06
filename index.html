@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <title>Note Takers</title>
-
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -13,9 +12,7 @@
       font-size: 14px;
     }
 
-    h2 {
-      margin-bottom: 12px;
-    }
+    h2 { margin-bottom: 12px; }
 
     label.section {
       font-weight: bold;
@@ -31,103 +28,39 @@
       border-radius: 4px;
     }
 
-    textarea {
-      min-height: 80px;
-      width: 100%;
-    }
+    textarea { min-height: 80px; width: 100%; }
+    select { max-width: 260px; }
 
-    select {
-      max-width: 260px;
-    }
+    .contact-row { display: flex; gap: 12px; margin-top: 4px; }
+    .contact-row input { flex: 1; }
 
-    .contact-row {
-      display: flex;
-      gap: 12px;
-      margin-top: 4px;
-    }
-
-    .contact-row input {
-      flex: 1;
-    }
-
-    .radio-group {
-      display: flex;
-      gap: 16px;
-      margin-top: 6px;
-    }
-
-    .radio-group label {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-    }
-
+    .radio-group { display: flex; gap: 16px; margin-top: 6px; }
+    .radio-group label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
     .yes { color: green; font-weight: bold; }
     .no { color: red; font-weight: bold; }
 
-    .config-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      margin-top: 8px;
-    }
+    .config-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+    .config-row input { width: 40%; }
+    .config-row select.duration { width: 100px; }
+    .config-row select.strategy { width: 140px; }
 
-    .config-row input {
-      width: 40%;
-    }
-
-    .config-row select.duration {
-      width: 100px;
-    }
-
-    .config-row select.strategy {
-      width: 140px;
-    }
-
-    .arrow {
-      font-weight: bold;
-      color: #555;
-      margin-left: 5px;
-      margin-right: 5px;
-    }
+    .arrow { font-weight: bold; color: #555; margin-left: 5px; margin-right: 5px; }
 
     .remove-btn {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      border: 1px solid #ccc;
-      background: #f5f5f5;
-      cursor: pointer;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 28px; height: 28px; border-radius: 50%; border: 1px solid #ccc;
+      background: #f5f5f5; cursor: pointer; font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
     }
-
-    .remove-btn:hover {
-      background: #e0e0e0;
-    }
+    .remove-btn:hover { background: #e0e0e0; }
 
     button {
-      margin-top: 12px;
-      padding: 6px 12px;
-      font-size: 13px;
-      cursor: pointer;
-      border-radius: 4px;
-      border: 1px solid #ccc;
+      margin-top: 12px; padding: 6px 12px; font-size: 13px;
+      cursor: pointer; border-radius: 4px; border: 1px solid #ccc;
       background: #f7f7f7;
     }
+    button:hover { background: #ededed; }
 
-    button:hover {
-      background: #ededed;
-    }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 14px;
-    }
+    .actions { display: flex; gap: 10px; margin-top: 14px; }
   </style>
 </head>
 <body>
@@ -191,32 +124,33 @@ const BACKEND_URL = "https://notes-backend-yheh.onrender.com";
 /* Duration dropdown */
 function durationDropdown() {
   let html = `<select class="duration"><option value="">Duration</option>`;
-  for (let i = 5; i <= 120; i += 5) {
-    html += `<option>${i} mins</option>`;
-  }
+  for (let i = 5; i <= 120; i += 5) html += `<option>${i} mins</option>`;
   return html + `</select>`;
 }
 
 /* Strategy dropdown */
 function strategyDropdown() {
-  return `
-    <select class="strategy">
+  return `<select class="strategy">
       <option value="Any Room">Any Room</option>
       <option value="All Rooms">All Rooms</option>
       <option value="Sequential">Sequential</option>
-    </select>
-  `;
+    </select>`;
 }
 
 /* Add operatory row */
-function addConfig() {
+function addConfig(isSequentialSecond = false) {
   const row = document.createElement("div");
   row.className = "config-row";
+  
+  // If second sequential row, remove strategy dropdown
+  const strategyHtml = isSequentialSecond ? "" : strategyDropdown();
+  const arrowHtml = isSequentialSecond ? '<span class="arrow">→</span>' : '<span class="arrow" style="display:none;">→</span>';
+
   row.innerHTML = `
     <input placeholder="Column / Operatory">
     ${durationDropdown()}
-    ${strategyDropdown()}
-    <span class="arrow" style="display:none;">→</span>
+    ${strategyHtml}
+    ${arrowHtml}
     <button class="remove-btn">✕</button>
   `;
 
@@ -224,21 +158,35 @@ function addConfig() {
   const arrowSpan = row.querySelector(".arrow");
 
   // Remove button
-  row.querySelector(".remove-btn").onclick = () => row.remove();
-
-  // Sequential auto-add logic
-  strategySelect.addEventListener("change", () => {
+  row.querySelector(".remove-btn").onclick = () => {
+    // If first sequential row is removed, also remove second
     const rows = [...document.querySelectorAll(".config-row")];
     const index = rows.indexOf(row);
-
-    if (strategySelect.value === "Sequential") {
-      arrowSpan.style.display = "inline";
-      // Auto-add next row if missing
-      if (!rows[index + 1]) addConfig();
-    } else {
-      arrowSpan.style.display = "none";
+    if(strategySelect && strategySelect.value === "Sequential" && rows[index + 1]){
+      rows[index + 1].remove();
     }
-  });
+    row.remove();
+  };
+
+  // Sequential auto-add logic (only for first row)
+  if(strategySelect){
+    strategySelect.addEventListener("change", () => {
+      const rows = [...document.querySelectorAll(".config-row")];
+      const index = rows.indexOf(row);
+
+      if (strategySelect.value === "Sequential") {
+        arrowSpan.style.display = "inline";
+        // Only add second sequential row if not exists
+        if(!rows[index + 1]) addConfig(true);
+      } else {
+        arrowSpan.style.display = "none";
+        // Remove second sequential row if exists
+        if(rows[index + 1] && !rows[index + 1].querySelector(".strategy")){
+          rows[index + 1].remove();
+        }
+      }
+    });
+  }
 
   configsContainer.appendChild(row);
 }
@@ -256,12 +204,9 @@ function clearAll() {
   addConfig();
 }
 
-/* Auto bullets for summary */
+/* Auto bullets */
 setupSummary.addEventListener("keydown", e => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    setupSummary.value += "\n- ";
-  }
+  if (e.key === "Enter") { e.preventDefault(); setupSummary.value += "\n- "; }
 });
 
 setupSummary.addEventListener("blur", () => {
@@ -275,17 +220,17 @@ setupSummary.addEventListener("blur", () => {
 
 /* GPT Fix */
 gptFixBtn.onclick = async () => {
-  if (!setupSummary.value) return;
+  if(!setupSummary.value) return;
   const res = await fetch(`${BACKEND_URL}/summary`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {"Content-Type":"application/json"},
     body: JSON.stringify({ text: setupSummary.value })
   });
   const data = await res.json();
   setupSummary.value = data.cleaned;
 };
 
-/* Copy note */
+/* Copy */
 copyBtn.onclick = async () => {
   const serverAccess = document.querySelector('input[name="serverAccess"]:checked')?.value || "Not set";
   const calendarSync = document.querySelector('input[name="calendarSync"]:checked')?.value || "Not set";
@@ -294,20 +239,23 @@ copyBtn.onclick = async () => {
   const configs = rows.map((r, i) => {
     const op = r.querySelector("input").value;
     const dur = r.querySelector(".duration").value;
-    const strat = r.querySelector(".strategy").value;
+    const strat = r.querySelector(".strategy");
+    const isSequentialSecond = !strat; // no strategy select = second sequential
 
-    if (strat === "Sequential") {
-      const next = rows[i + 1];
-      if (next) {
-        const nextOp = next.querySelector("input").value;
-        const nextDur = next.querySelector(".duration").value;
-        return `- ${op} | ${dur} → ${nextOp} | ${nextDur} sequential`;
-      }
-      return `- ${op} | ${dur} → Sequential (next operatory not set)`;
+    if(isSequentialSecond){
+      const prev = rows[i-1];
+      const prevOp = prev.querySelector("input").value;
+      const prevDur = prev.querySelector(".duration").value;
+      return `- ${prevOp} | ${prevDur} → ${op} | ${dur} Sequential`;
     }
 
-    return `- ${op} | ${dur} | ${strat}`;
-  }).join("\n");
+    if(strat.value === "Sequential" && rows[i+1]){
+      // first row, skip here, second row handled above
+      return '';
+    }
+
+    return `- ${op} | ${dur} | ${strat.value}`;
+  }).filter(Boolean).join("\n");
 
   const note = `
 ${integrationType.value}
@@ -333,6 +281,5 @@ ${setupSummary.value}
   alert("Copied to clipboard");
 };
 </script>
-
 </body>
 </html>
