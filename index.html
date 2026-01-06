@@ -6,8 +6,8 @@
   <style>
     body { font-family: Arial; max-width: 860px; margin: auto; padding: 18px; font-size: 14px; background:#fdfdfd; }
     label.section { font-weight: bold; margin-top: 12px; display: block; }
-    input, select, textarea { padding: 6px; margin-top: 4px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; }
-    textarea { min-height: 80px; width: 100%; }
+    input, select, textarea { padding: 8px; margin-top: 4px; font-size: 14px; border: 1px solid #ccc; border-radius: 6px; }
+    textarea { min-height: 80px; width: 100%; resize: vertical; }
     select { max-width: 260px; }
     .contact-row { display: flex; gap: 12px; margin-top: 4px; }
     .contact-row input { flex: 1; }
@@ -39,6 +39,22 @@
       margin-bottom: 16px;
     }
     .header span.icon { font-size: 32px; }
+
+    /* Practice Name input style */
+    #practiceName {
+      width: 100%;
+      font-size: 16px;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #aaa;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+      transition: border 0.2s, box-shadow 0.2s;
+    }
+    #practiceName:focus {
+      border-color: #4a90e2;
+      box-shadow: 0 0 6px rgba(74,144,226,0.3) inset;
+      outline: none;
+    }
   </style>
 </head>
 <body>
@@ -97,6 +113,7 @@
 <label class="section">Setup Summary</label>
 <textarea id="setupSummary" placeholder="- Calendar sync completed"></textarea>
 
+<!-- Buttons -->
 <div class="actions">
   <button id="gptFixBtn">✏️ Fix Grammar</button>
   <button id="copyBtn" disabled>📋 Copy to Clipboard</button>
@@ -246,7 +263,7 @@ copyBtn.onclick = async () => {
   alert("Copied to clipboard");
 };
 
-/* Save to File - placeholder logic, file name from Practice Name */
+/* Save to File - Practice Name as file name */
 saveFileBtn.onclick = () => {
   const noteText = generateCurrentNote();
   const practiceName = document.getElementById("practiceName").value || "EZ_Note";
