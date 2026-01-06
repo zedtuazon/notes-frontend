@@ -11,7 +11,6 @@
       margin: auto;
       padding: 18px;
       font-size: 14px;
-      background: #fff;
     }
 
     h2 {
@@ -32,20 +31,27 @@
       border-radius: 4px;
     }
 
-    input, textarea {
-      width: 100%;
-    }
-
     textarea {
       min-height: 80px;
-      resize: vertical;
+      width: 100%;
     }
 
     select {
       max-width: 260px;
     }
 
-    /* Radios with icons */
+    /* Contact row */
+    .contact-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .contact-row input {
+      flex: 1;
+    }
+
+    /* Radios */
     .radio-group {
       display: flex;
       gap: 16px;
@@ -71,7 +77,7 @@
     }
 
     .config-row input {
-      flex: 1;
+      width: 50%;
     }
 
     .config-row select {
@@ -86,7 +92,6 @@
       background: #f5f5f5;
       cursor: pointer;
       font-size: 14px;
-      line-height: 1;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -130,11 +135,11 @@
   <option>Sikka Integration</option>
 </select>
 
-<label class="section">Contact Name</label>
-<input id="contactName">
-
-<label class="section">Phone Number</label>
-<input id="phoneNumber">
+<label class="section">Contact Info</label>
+<div class="contact-row">
+  <input id="contactName" placeholder="Contact Name">
+  <input id="phoneNumber" placeholder="Phone Number">
+</div>
 
 <label class="section">Integration Status</label>
 <select id="integrationStatus">
@@ -169,6 +174,7 @@
 <div class="actions">
   <button id="gptFixBtn">Fix Grammar</button>
   <button id="copyBtn">Copy to Clipboard</button>
+  <button onclick="clearAll()">Clear All</button>
 </div>
 
 <script>
@@ -190,12 +196,26 @@ function addConfig() {
   row.innerHTML = `
     <input placeholder="Column / Operatory">
     ${createDurationDropdown()}
-    <button class="remove-btn" title="Remove">✕</button>
+    <button class="remove-btn">✕</button>
   `;
   row.querySelector(".remove-btn").onclick = () => row.remove();
   configsContainer.appendChild(row);
 }
 addConfig();
+
+/* Clear all */
+function clearAll() {
+  document.querySelectorAll("input").forEach(i => {
+    if (i.type === "radio") i.checked = false;
+    else i.value = "";
+  });
+
+  document.querySelectorAll("textarea").forEach(t => t.value = "");
+  document.querySelectorAll("select").forEach(s => s.selectedIndex = 0);
+
+  configsContainer.innerHTML = "";
+  addConfig();
+}
 
 /* Auto bullets */
 setupSummary.addEventListener("keydown", e => {
