@@ -70,27 +70,34 @@ function setYesNo(field, value) {
   alert(`${field} set to ${value ? "Yes" : "No"}`);
 }
 
-// GPT grammar / bullet point correction
+// Replace this with your Render backend URL
+const BACKEND_URL = "https://notes-backend.onrender.com";
+
 document.getElementById("gptFixBtn").onclick = async () => {
   const text = document.getElementById("setupSummary").value;
   if (!text) return alert("Write something in Setup Summary first.");
 
   try {
-    const res = await fetch("https://YOUR_BACKEND_URL/summary", {
+    const res = await fetch(`${BACKEND_URL}/summary`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text })
     });
 
+    if (!res.ok) {
+      const errorText = await res.text();
+      alert(`Backend error: ${res.status}\n${errorText}`);
+      return;
+    }
+
     const data = await res.json();
     document.getElementById("setupSummary").value = data.cleaned;
   } catch (err) {
-    alert("Failed to correct summary. Check backend URL.");
+    alert(`Failed to connect to backend.\nCheck the URL and backend logs.`);
     console.error(err);
   }
 };
 
-// Copy full note
 document.getElementById("copyBtn").onclick = async () => {
   const fullNote = `
 OCS Tracker Integration: ${document.getElementById("integrationType").value}
@@ -111,8 +118,13 @@ Setup Summary:
 ${document.getElementById("setupSummary").value}
 `;
 
-  await navigator.clipboard.writeText(fullNote.trim());
-  alert("Complete note copied!");
+  try {
+    await navigator.clipboard.writeText(fullNote.trim());
+    alert("Complete note copied!");
+  } catch (err) {
+    alert("Failed to copy to clipboard.");
+    console.error(err);
+  }
 };
 </script>
 
