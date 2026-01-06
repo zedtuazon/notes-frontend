@@ -80,7 +80,7 @@
 
 <div class="actions">
   <button id="gptFixBtn">Fix Grammar</button>
-  <button id="copyBtn">Copy to Clipboard</button>
+  <button id="copyBtn" disabled>Copy to Clipboard</button>
 </div>
 <button style="margin-top: 10px;" onclick="clearAll()">Clear All</button>
 
@@ -88,6 +88,7 @@
 const BACKEND_URL = "https://notes-backend-yheh.onrender.com";
 const configsContainer = document.getElementById("configsContainer");
 const addBtn = document.getElementById("addOperatoryBtn");
+const copyBtn = document.getElementById("copyBtn");
 
 /* Duration dropdown */
 function durationDropdown(){
@@ -129,6 +130,7 @@ function addConfig(isSequentialSecond=false){
     const index = rows.indexOf(row);
     if(strategySelect && strategySelect.value==="Sequential" && rows[index+1]) rows[index+1].remove();
     row.remove();
+    validateFields();
   };
 
   if(strategySelect){
@@ -142,10 +144,12 @@ function addConfig(isSequentialSecond=false){
         arrowSpan.style.display="none";
         if(rows[index+1] && !rows[index+1].querySelector(".strategy")) rows[index+1].remove();
       }
+      validateFields();
     });
   }
 
   configsContainer.appendChild(row);
+  validateFields();
 }
 
 /* Clear all */
@@ -158,6 +162,7 @@ function clearAll(){
   configsContainer.innerHTML="";
   addConfig();
   enableConfigs(true);
+  validateFields();
 }
 
 /* Auto bullets for blocker */
@@ -171,10 +176,7 @@ blocker.addEventListener("blur", ()=>{
 });
 
 /* Setup Summary - flexible new lines with auto-bullets on blur */
-setupSummary.addEventListener("keydown", e=>{
-  // Allow Enter freely
-});
-
+setupSummary.addEventListener("keydown", e=>{ });
 setupSummary.addEventListener("blur", ()=>{
   setupSummary.value = setupSummary.value
     .split("\n")
@@ -204,6 +206,7 @@ document.querySelectorAll('input[name="calendarSync"]').forEach(r=>{
       addConfig();
       enableConfigs(true);
     }
+    validateFields();
   });
 });
 
@@ -221,12 +224,14 @@ gptFixBtn.onclick=async()=>{
 
 /* Copy note */
 copyBtn.onclick = async () => {
-  const serverAccess = document.querySelector('input[name="serverAccess"]:checked')?.value || "Not set";
-  const calendarSync = document.querySelector('input[name="calendarSync"]:checked')?.value || "Not set";
+  const integrationTypeVal = integrationType.value;
+  const integrationStatusVal = integrationStatus.value;
+  const serverAccessVal = document.querySelector('input[name="serverAccess"]:checked')?.value || "Not set";
+  const calendarSyncVal = document.querySelector('input[name="calendarSync"]:checked')?.value || "Not set";
 
   let configs = "";
-  if(calendarSync === "No"){
-    configs = "- N/A";  // FIX: always include - N/A when Calendar Sync is No
+  if(calendarSyncVal === "No"){
+    configs = "- N/A";
   } else {
     const rows = [...document.querySelectorAll(".config-row")];
     configs = rows.map((r, i) => {
@@ -248,14 +253,14 @@ copyBtn.onclick = async () => {
   }
 
   const note = `
-${integrationType.value}
+${integrationTypeVal}
 
 Contact Name: ${contactName.value}
 Phone Number: ${phoneNumber.value}
-Integration Status: ${integrationStatus.value || "Not set"}
+Integration Status: ${integrationStatusVal || "Not set"}
 
-Server Access: ${serverAccess}
-Calendar Sync Configured: ${calendarSync}
+Server Access: ${serverAccessVal}
+Calendar Sync Configured: ${calendarSyncVal}
 
 Configs / Operatory Setup:
 ${configs}
@@ -270,6 +275,42 @@ ${setupSummary.value}
   await navigator.clipboard.writeText(note);
   alert("Copied to clipboard");
 };
+
+/* ========== Validation for required fields ========== */
+function validateFields() {
+  const integrationTypeVal = integrationType.value;
+  const integrationStatusVal = integrationStatus.value;
+  const serverAccessVal = document.querySelector('input[name="serverAccess"]:checked')?.value;
+  const calendarSyncVal = document.querySelector('input[name="calendarSync"]:checked')?.value;
+
+  let configsFilled = false;
+  if(calendarSyncVal === "No"){
+    configsFilled = true; // - N/A counts as filled
+  } else {
+    const rows = [...document.querySelectorAll(".config-row")];
+    configsFilled = rows.length > 0 && rows.every(r=>{
+      const op = r.querySelector("input")?.value;
+      const dur = r.querySelector(".duration")?.value;
+      const strat = r.querySelector(".strategy");
+      return op && dur && (strat || true);
+    });
+  }
+
+  copyBtn.disabled = !(integrationTypeVal && integrationStatusVal && serverAccessVal && calendarSyncVal && configsFilled);
+}
+
+/* Add event listeners to revalidate in real-time */
+integrationType.addEventListener("change", validateFields);
+integrationStatus.addEventListener("change", validateFields);
+document.querySelectorAll('input[name="serverAccess"]').forEach(r => r.addEventListener("change", validateFields));
+document.querySelectorAll('input[name="calendarSync"]').forEach(r => r.addEventListener("change", validateFields));
+configsContainer.addEventListener("input", validateFields);
+configsContainer.addEventListener("change", validateFields);
+
+// Initial setup
+addConfig();
+validateFields();
+
 </script>
 </body>
 </html>
