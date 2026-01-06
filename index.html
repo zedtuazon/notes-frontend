@@ -6,7 +6,7 @@
   <style>
     body { font-family: Arial; max-width: 860px; margin: auto; padding: 18px; font-size: 14px; background:#fdfdfd; }
     label.section { font-weight: bold; margin-top: 12px; display: block; }
-    input, select, textarea { padding: 8px; margin-top: 4px; font-size: 14px; border: 1px solid #ccc; border-radius: 6px; }
+    input, select, textarea { padding: 6px; margin-top: 4px; font-size: 14px; border: 1px solid #ccc; border-radius: 6px; }
     textarea { min-height: 80px; width: 100%; resize: vertical; }
     select { max-width: 260px; }
     .contact-row { display: flex; gap: 12px; margin-top: 4px; }
@@ -43,12 +43,14 @@
     /* Practice Name input style */
     #practiceName {
       width: 100%;
-      font-size: 16px;
-      padding: 10px;
+      font-size: 14px;
+      padding: 6px;
       border-radius: 6px;
-      border: 1px solid #aaa;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+      border: 1px solid #ccc;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
       transition: border 0.2s, box-shadow 0.2s;
+      height: 34px; /* same height as other inputs */
+      box-sizing: border-box;
     }
     #practiceName:focus {
       border-color: #4a90e2;
@@ -115,9 +117,9 @@
 
 <!-- Buttons -->
 <div class="actions">
-  <button id="gptFixBtn">✏️ Fix Grammar</button>
   <button id="copyBtn" disabled>📋 Copy to Clipboard</button>
-  <button id="saveFileBtn">💾 Save to File</button>
+  <button id="gptFixBtn">✏️ Fix Grammar</button>
+  <button id="saveFileBtn" disabled>💾 Save to File</button>
 </div>
 <button style="margin-top: 10px;" onclick="clearAll()">🧹 Clear All</button>
 
@@ -226,7 +228,6 @@ function enableConfigs(enable){
     el.disabled = !enable;
     if(!enable) el.classList.add("disabled"); else el.classList.remove("disabled");
   });
-  addBtn.disabled = !enable;
 }
 
 /* Calendar sync behavior */
@@ -244,7 +245,7 @@ document.querySelectorAll('input[name="calendarSync"]').forEach(r=>{
   });
 });
 
-/* GPT Fix */
+// GPT Fix
 gptFixBtn.onclick=async()=>{
   if(!setupSummary.value) return;
   const res=await fetch(`${BACKEND_URL}/summary`,{
@@ -256,14 +257,14 @@ gptFixBtn.onclick=async()=>{
   setupSummary.value=data.cleaned;
 };
 
-/* Copy note */
+// Copy note
 copyBtn.onclick = async () => {
   const noteText = generateCurrentNote();
   await navigator.clipboard.writeText(noteText);
   alert("Copied to clipboard");
 };
 
-/* Save to File - Practice Name as file name */
+// Save to File
 saveFileBtn.onclick = () => {
   const noteText = generateCurrentNote();
   const practiceName = document.getElementById("practiceName").value || "EZ_Note";
@@ -349,7 +350,10 @@ function validateFields() {
     });
   }
 
-  copyBtn.disabled = !(integrationTypeVal && integrationStatusVal && serverAccessVal && calendarSyncVal && configsFilled);
+  const allRequiredFilled = integrationTypeVal && integrationStatusVal && serverAccessVal && calendarSyncVal && configsFilled;
+
+  copyBtn.disabled = !allRequiredFilled;
+  saveFileBtn.disabled = !allRequiredFilled;
 }
 
 integrationType.addEventListener("change", validateFields);
