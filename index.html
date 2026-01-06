@@ -1,14 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>OCS Tracker Notes</title>
   <style>
-    body { font-family: Arial; padding: 20px; max-width: 800px; margin: auto; }
-    textarea, input, select { width: 100%; margin: 5px 0 15px; padding: 5px; font-size: 14px; }
-    button { margin-right: 10px; padding: 5px 10px; font-size: 14px; cursor: pointer; }
-    label { font-weight: bold; display: block; margin-top: 10px; }
-    .yesno button { width: 60px; margin-right: 5px; }
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 6px;
+      margin-top: 5px;
+      font-size: 14px;
+    }
+
+    textarea {
+      min-height: 80px;
+    }
+
+    .radio-group {
+      margin-top: 5px;
+    }
+
+    .radio-group label {
+      font-weight: normal;
+      margin-right: 15px;
+    }
+
+    button {
+      margin-top: 15px;
+      margin-right: 10px;
+      padding: 8px 14px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .config-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      margin-top: 10px;
+      align-items: center;
+    }
+
+    .remove-btn {
+      background: #eee;
+      border: 1px solid #ccc;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -25,10 +74,10 @@
 </select>
 
 <label>Contact Name</label>
-<input id="contactName" placeholder="Contact Name" />
+<input id="contactName" />
 
 <label>Phone Number</label>
-<input id="phoneNumber" placeholder="Phone Number" />
+<input id="phoneNumber" />
 
 <label>Integration Status</label>
 <select id="integrationStatus">
@@ -38,46 +87,54 @@
 </select>
 
 <label>Server Access</label>
-<div class="yesno">
-  <button onclick="setYesNo('serverAccess', true)">Yes</button>
-  <button onclick="setYesNo('serverAccess', false)">No</button>
+<div class="radio-group">
+  <label><input type="radio" name="serverAccess" value="Yes"> Yes</label>
+  <label><input type="radio" name="serverAccess" value="No"> No</label>
 </div>
 
 <label>Calendar Sync Configured</label>
-<div class="yesno">
-  <button onclick="setYesNo('calendarSync', true)">Yes</button>
-  <button onclick="setYesNo('calendarSync', false)">No</button>
+<div class="radio-group">
+  <label><input type="radio" name="calendarSync" value="Yes"> Yes</label>
+  <label><input type="radio" name="calendarSync" value="No"> No</label>
 </div>
 
 <label>Configs / Operatory Setup</label>
-<input id="configs" placeholder="Configs / Operatory Setup" />
+<div id="configsContainer"></div>
+<button onclick="addConfig()">+ Add Operatory</button>
 
 <label>Blocker</label>
-<textarea id="blocker" placeholder="Blocker"></textarea>
+<textarea id="blocker"></textarea>
 
 <label>Setup Summary</label>
 <textarea id="setupSummary" placeholder="Write setup summary..."></textarea>
 
-<br>
 <button id="gptFixBtn">Fix Grammar & Bullet Points</button>
 <button id="copyBtn">Copy Full Note</button>
 
 <script>
-const state = { serverAccess: null, calendarSync: null };
-
-// Backend URL (your deployed notes-backend)
 const BACKEND_URL = "https://notes-backend-yheh.onrender.com";
 
-// Set YES/NO state
-function setYesNo(field, value) {
-  state[field] = value;
-  alert(`${field} set to ${value ? "Yes" : "No"}`);
+/* ---------- Dynamic Config Rows ---------- */
+function addConfig(column = "", duration = "") {
+  const row = document.createElement("div");
+  row.className = "config-row";
+
+  row.innerHTML = `
+    <input placeholder="Column / Operatory" value="${column}">
+    <input placeholder="Duration (e.g. 90 mins)" value="${duration}">
+    <button class="remove-btn" onclick="this.parentElement.remove()">✕</button>
+  `;
+
+  document.getElementById("configsContainer").appendChild(row);
 }
 
-// GPT grammar / bullet points
+// Add one row by default
+addConfig();
+
+/* ---------- GPT Fix ---------- */
 document.getElementById("gptFixBtn").onclick = async () => {
   const text = document.getElementById("setupSummary").value;
-  if (!text) return alert("Write something in Setup Summary first.");
+  if (!text) return alert("Please enter a setup summary first.");
 
   try {
     const res = await fetch(`${BACKEND_URL}/summary`, {
@@ -86,12 +143,8 @@ document.getElementById("gptFixBtn").onclick = async () => {
       body: JSON.stringify({ text })
     });
 
-    console.log("Response status:", res.status);
-
     if (!res.ok) {
-      const errorText = await res.text();
-      console.log("Backend returned:", errorText);
-      alert(`Backend error: ${res.status}\nCheck console for details`);
+      alert("Backend error. Check logs.");
       return;
     }
 
@@ -99,39 +152,44 @@ document.getElementById("gptFixBtn").onclick = async () => {
     document.getElementById("setupSummary").value = data.cleaned;
 
   } catch (err) {
-    console.error("Fetch error:", err);
-    alert("Failed to connect to backend.\nCheck console for details");
+    console.error(err);
+    alert("Failed to connect to backend.");
   }
 };
 
-// Copy full note to clipboard
+/* ---------- Copy Full Note ---------- */
 document.getElementById("copyBtn").onclick = async () => {
-  const fullNote = `
-OCS Tracker Integration: ${document.getElementById("integrationType").value}
-Contact Name: ${document.getElementById("contactName").value}
-Phone Number: ${document.getElementById("phoneNumber").value}
-Integration Status: ${document.getElementById("integrationStatus").value}
+  const serverAccess =
+    document.querySelector('input[name="serverAccess"]:checked')?.value || "Not set";
+  const calendarSync =
+    document.querySelector('input[name="calendarSync"]:checked')?.value || "Not set";
 
-Server Access: ${state.serverAccess === null ? "Not set" : state.serverAccess ? "Yes" : "No"}
-Calendar Sync Configured: ${state.calendarSync === null ? "Not set" : state.calendarSync ? "Yes" : "No"}
+  const configRows = [...document.querySelectorAll(".config-row")].map(row => {
+    const inputs = row.querySelectorAll("input");
+    return `- ${inputs[0].value} | ${inputs[1].value}`;
+  }).join("\n");
+
+  const note = `
+OCS Tracker Integration: ${integrationType.value}
+Contact Name: ${contactName.value}
+Phone Number: ${phoneNumber.value}
+Integration Status: ${integrationStatus.value}
+
+Server Access: ${serverAccess}
+Calendar Sync Configured: ${calendarSync}
 
 Configs / Operatory Setup:
-${document.getElementById("configs").value}
+${configRows}
 
 Blocker:
-${document.getElementById("blocker").value}
+${blocker.value}
 
 Setup Summary:
-${document.getElementById("setupSummary").value}
+${setupSummary.value}
 `;
 
-  try {
-    await navigator.clipboard.writeText(fullNote.trim());
-    alert("Complete note copied!");
-  } catch (err) {
-    alert("Failed to copy to clipboard.");
-    console.error(err);
-  }
+  await navigator.clipboard.writeText(note.trim());
+  alert("Full note copied to clipboard!");
 };
 </script>
 
