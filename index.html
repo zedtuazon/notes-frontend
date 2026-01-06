@@ -4,41 +4,29 @@
   <meta charset="UTF-8" />
   <title>Note Takers</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 860px;
-      margin: auto;
-      padding: 18px;
-      font-size: 14px;
-    }
-
+    body { font-family: Arial; max-width: 860px; margin: auto; padding: 18px; font-size: 14px; }
     h2 { margin-bottom: 12px; }
     label.section { font-weight: bold; margin-top: 12px; display: block; }
     input, select, textarea { padding: 6px; margin-top: 4px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; }
     textarea { min-height: 80px; width: 100%; }
     select { max-width: 260px; }
-
     .contact-row { display: flex; gap: 12px; margin-top: 4px; }
     .contact-row input { flex: 1; }
-
     .radio-group { display: flex; gap: 16px; margin-top: 6px; }
     .radio-group label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
     .yes { color: green; font-weight: bold; }
     .no { color: red; font-weight: bold; }
-
     .config-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
     .config-row input { width: 40%; }
     .config-row select.duration { width: 100px; }
     .config-row select.strategy { width: 140px; }
-
     .arrow { font-weight: bold; color: #555; margin-left: 5px; margin-right: 5px; }
-
     .remove-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #ccc; background: #f5f5f5; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
     .remove-btn:hover { background: #e0e0e0; }
-
     button { margin-top: 12px; padding: 6px 12px; font-size: 13px; cursor: pointer; border-radius: 4px; border: 1px solid #ccc; background: #f7f7f7; }
     button:hover { background: #ededed; }
     .actions { display: flex; gap: 10px; margin-top: 14px; }
+    .disabled { background: #f0f0f0; pointer-events: none; }
   </style>
 </head>
 <body>
@@ -82,7 +70,7 @@
 
 <label class="section">Configs / Operatory Setup</label>
 <div id="configsContainer"></div>
-<button onclick="addConfig()">+ Add Operatory</button>
+<button id="addOperatoryBtn" onclick="addConfig()">+ Add Operatory</button>
 
 <label class="section">Blocker</label>
 <textarea id="blocker" placeholder="- "></textarea>
@@ -98,16 +86,18 @@
 
 <script>
 const BACKEND_URL = "https://notes-backend-yheh.onrender.com";
+const configsContainer = document.getElementById("configsContainer");
+const addBtn = document.getElementById("addOperatoryBtn");
 
 /* Duration dropdown */
-function durationDropdown() {
+function durationDropdown(){
   let html = `<select class="duration"><option value="">Duration</option>`;
-  for (let i = 5; i <= 120; i+=5) html += `<option>${i} mins</option>`;
+  for(let i=5;i<=120;i+=5) html += `<option>${i} mins</option>`;
   return html + `</select>`;
 }
 
 /* Strategy dropdown */
-function strategyDropdown() {
+function strategyDropdown(){
   return `<select class="strategy">
     <option value="Any Room">Any Room</option>
     <option value="All Rooms">All Rooms</option>
@@ -116,7 +106,7 @@ function strategyDropdown() {
 }
 
 /* Add config row */
-function addConfig(isSequentialSecond=false) {
+function addConfig(isSequentialSecond=false){
   const row = document.createElement("div");
   row.className = "config-row";
 
@@ -134,7 +124,6 @@ function addConfig(isSequentialSecond=false) {
   const strategySelect = row.querySelector(".strategy");
   const arrowSpan = row.querySelector(".arrow");
 
-  // Remove button
   row.querySelector(".remove-btn").onclick = () => {
     const rows = [...document.querySelectorAll(".config-row")];
     const index = rows.indexOf(row);
@@ -142,11 +131,10 @@ function addConfig(isSequentialSecond=false) {
     row.remove();
   };
 
-  // Sequential auto-add
   if(strategySelect){
     strategySelect.addEventListener("change",()=>{
-      const rows = [...document.querySelectorAll(".config-row")];
-      const index = rows.indexOf(row);
+      const rows=[...document.querySelectorAll(".config-row")];
+      const index=rows.indexOf(row);
       if(strategySelect.value==="Sequential"){
         arrowSpan.style.display="inline";
         if(!rows[index+1]) addConfig(true);
@@ -159,18 +147,17 @@ function addConfig(isSequentialSecond=false) {
 
   configsContainer.appendChild(row);
 }
-addConfig();
 
 /* Clear all */
 function clearAll(){
   document.querySelectorAll("input").forEach(i=>{
-    if(i.type==="radio") i.checked=false;
-    else i.value="";
+    if(i.type==="radio") i.checked=false; else i.value="";
   });
   document.querySelectorAll("textarea").forEach(t=>t.value="");
   document.querySelectorAll("select").forEach(s=>s.selectedIndex=0);
   configsContainer.innerHTML="";
   addConfig();
+  enableConfigs(true);
 }
 
 /* Auto bullets for summary */
@@ -193,11 +180,26 @@ blocker.addEventListener("blur", ()=>{
     .map(l=>l.startsWith("-")?l:`- ${l}`).join("\n");
 });
 
-/* Calendar sync default N/A */
+/* Enable/Disable configs */
+function enableConfigs(enable){
+  document.querySelectorAll(".config-row input, .config-row select").forEach(el=>{
+    if(el.tagName==="SELECT" || el.tagName==="INPUT") el.disabled = !enable;
+    if(!enable) el.classList.add("disabled"); else el.classList.remove("disabled");
+  });
+  addBtn.disabled = !enable;
+}
+
+/* Calendar sync behavior */
 document.querySelectorAll('input[name="calendarSync"]').forEach(r=>{
   r.addEventListener("change", ()=>{
-    const rows = [...document.querySelectorAll(".config-row")];
-    if(rows.length===0) configsContainer.innerHTML = '<div>- N/A</div>';
+    if(r.value==="No"){
+      configsContainer.innerHTML = '<div>- N/A</div>';
+      enableConfigs(false);
+    } else {
+      configsContainer.innerHTML="";
+      addConfig();
+      enableConfigs(true);
+    }
   });
 });
 
@@ -220,16 +222,20 @@ copyBtn.onclick=async()=>{
 
   const rows=[...document.querySelectorAll(".config-row")];
   const configs=rows.map((r,i)=>{
-    const op=r.querySelector("input").value;
-    const dur=r.querySelector(".duration")?.value||"";
+    const op=r.querySelector("input")?.value || "";
+    const dur=r.querySelector(".duration")?.value || "";
     const strat=r.querySelector(".strategy");
-    const isSequentialSecond=!strat;
+    const isSequentialSecond = !strat;
+
+    if(rows.length===1 && r.innerText.trim()==="- N/A") return "- N/A";
+
     if(isSequentialSecond){
       const prev=rows[i-1];
       const prevOp=prev.querySelector("input").value;
       const prevDur=prev.querySelector(".duration").value;
       return `- ${prevOp} | ${prevDur} → ${op} | ${dur} Sequential`;
     }
+
     if(strat && strat.value==="Sequential" && rows[i+1]) return "";
     return `- ${op} | ${dur} | ${strat?strat.value:""}`;
   }).filter(Boolean).join("\n");
