@@ -159,4 +159,171 @@
 <label class="section">Calendar Sync Configured</label>
 <div class="radio-group">
   <label><input type="radio" name="calendarSync" value="Yes"><span class="yes">✔</span>Yes</label>
-  <label><input type="radio" name="calendarSync" value="No"><span class="no">✖</s
+  <label><input type="radio" name="calendarSync" value="No"><span class="no">✖</span>No</label>
+</div>
+
+<label class="section">Configs / Operatory Setup</label>
+<div id="configsContainer"></div>
+<button onclick="addConfig()">+ Add Operatory</button>
+
+<label class="section">Blocker</label>
+<textarea id="blocker"></textarea>
+
+<label class="section">Setup Summary</label>
+<textarea id="setupSummary" placeholder="- Calendar sync completed"></textarea>
+
+<div class="actions">
+  <button id="gptFixBtn">Fix Grammar</button>
+  <button id="copyBtn">Copy to Clipboard</button>
+  <button onclick="clearAll()">Clear All</button>
+</div>
+
+<script>
+const BACKEND_URL = "https://notes-backend-yheh.onrender.com";
+
+/* Duration dropdown */
+function durationDropdown() {
+  let html = `<select class="duration"><option value="">Duration</option>`;
+  for (let i = 5; i <= 120; i += 5) {
+    html += `<option>${i} mins</option>`;
+  }
+  return html + `</select>`;
+}
+
+/* Strategy dropdown */
+function strategyDropdown() {
+  return `
+    <select class="strategy">
+      <option value="Any Room">Any Room</option>
+      <option value="All Rooms">All Rooms</option>
+      <option value="Sequential">Sequential</option>
+    </select>
+  `;
+}
+
+/* Add operatory row */
+function addConfig() {
+  const row = document.createElement("div");
+  row.className = "config-row";
+  row.innerHTML = `
+    <input placeholder="Column / Operatory">
+    ${durationDropdown()}
+    ${strategyDropdown()}
+    <button class="remove-btn">✕</button>
+  `;
+
+  row.querySelector(".remove-btn").onclick = () => row.remove();
+
+  // Auto-add next operatory if Sequential selected
+  row.querySelector(".strategy").addEventListener("change", () => {
+    if (row.querySelector(".strategy").value === "Sequential") {
+      ensureNextRow(row);
+    }
+  });
+
+  configsContainer.appendChild(row);
+}
+
+/* Ensure next operatory exists for sequential */
+function ensureNextRow(currentRow) {
+  const rows = [...document.querySelectorAll(".config-row")];
+  const index = rows.indexOf(currentRow);
+  if (!rows[index + 1]) {
+    addConfig();
+  }
+}
+
+addConfig();
+
+/* Clear all */
+function clearAll() {
+  document.querySelectorAll("input").forEach(i => {
+    if (i.type === "radio") i.checked = false;
+    else i.value = "";
+  });
+  document.querySelectorAll("textarea").forEach(t => t.value = "");
+  document.querySelectorAll("select").forEach(s => s.selectedIndex = 0);
+  configsContainer.innerHTML = "";
+  addConfig();
+}
+
+/* Auto bullets for summary */
+setupSummary.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    setupSummary.value += "\n- ";
+  }
+});
+
+setupSummary.addEventListener("blur", () => {
+  setupSummary.value = setupSummary.value
+    .split("\n")
+    .map(l => l.trim())
+    .filter(Boolean)
+    .map(l => l.startsWith("-") ? l : `- ${l}`)
+    .join("\n");
+});
+
+/* GPT Fix */
+gptFixBtn.onclick = async () => {
+  if (!setupSummary.value) return;
+  const res = await fetch(`${BACKEND_URL}/summary`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text: setupSummary.value })
+  });
+  const data = await res.json();
+  setupSummary.value = data.cleaned;
+};
+
+/* Copy note */
+copyBtn.onclick = async () => {
+  const serverAccess = document.querySelector('input[name="serverAccess"]:checked')?.value || "Not set";
+  const calendarSync = document.querySelector('input[name="calendarSync"]:checked')?.value || "Not set";
+
+  const rows = [...document.querySelectorAll(".config-row")];
+  const configs = rows.map((r, i) => {
+    const op = r.querySelector("input").value;
+    const dur = r.querySelector(".duration").value;
+    const strat = r.querySelector(".strategy").value;
+
+    if (strat === "Sequential") {
+      const next = rows[i + 1];
+      if (next) {
+        const nextOp = next.querySelector("input").value;
+        const nextDur = next.querySelector(".duration").value;
+        return `- ${op} | ${dur} → ${nextOp} | ${nextDur} sequential`;
+      }
+      return `- ${op} | ${dur} → Sequential (next operatory not set)`;
+    }
+
+    return `- ${op} | ${dur} | ${strat}`;
+  }).join("\n");
+
+  const note = `
+${integrationType.value}
+
+Contact Name: ${contactName.value}
+Phone Number: ${phoneNumber.value}
+Integration Status: ${integrationStatus.value || "Not set"}
+
+Server Access: ${serverAccess}
+Calendar Sync Configured: ${calendarSync}
+
+Configs / Operatory Setup:
+${configs}
+
+Blocker:
+${blocker.value}
+
+Setup Summary:
+${setupSummary.value}
+`.trim();
+
+  await navigator.clipboard.writeText(note);
+  alert("Copied to clipboard");
+};
+</script>
+
+</body>
+</html>
