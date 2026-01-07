@@ -11,134 +11,144 @@ body {
   margin: auto;
   padding: 18px;
   font-size: 14px;
+  background: #fdfdfd;
 }
 
 .header {
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:10px;
-  font-size:28px;
-  font-weight:bold;
-  margin-bottom:16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 16px;
 }
 
 label.section {
-  font-weight:bold;
-  margin-top:12px;
-  display:block;
+  font-weight: bold;
+  margin-top: 12px;
+  display: block;
 }
 
 input, select, textarea {
-  padding:6px;
-  margin-top:4px;
-  font-size:14px;
-  border:1px solid #ccc;
-  border-radius:6px;
+  padding: 6px;
+  margin-top: 4px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
 }
 
 textarea {
-  width:100%;
-  min-height:80px;
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
 }
 
 .contact-row {
-  display:flex;
-  gap:12px;
+  display: flex;
+  gap: 12px;
 }
 
 .radio-group {
-  display:flex;
-  gap:16px;
-  margin-top:6px;
+  display: flex;
+  gap: 16px;
+  margin-top: 6px;
 }
 
-.yes { color:green; font-weight:bold; }
-.no { color:red; font-weight:bold; }
+.yes { color: green; font-weight: bold; }
+.no { color: red; font-weight: bold; }
 
 .provider-group {
-  border:1px solid #ddd;
-  border-radius:6px;
-  padding:8px;
-  margin-top:10px;
-  background:#fafafa;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px;
+  margin-top: 10px;
+  background: #fafafa;
 }
 
 .provider-header {
-  display:flex;
-  gap:6px;
-  align-items:center;
+  display: flex;
+  gap: 6px;
+  align-items: center;
 }
 
 .provider-header input {
-  flex:1;
+  flex: 1;
 }
 
 .config-group {
-  margin-left:16px;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
+  margin-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .config-row {
-  display:flex;
-  gap:8px;
-  align-items:center;
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .config-row input {
-  width:40%;
+  width: 40%;
 }
 
-.duration { width:110px; }
-.strategy { width:140px; }
+.duration { width: 110px; }
+.strategy { width: 140px; }
 
 .arrow {
-  font-weight:bold;
-  margin:0 6px;
+  font-weight: bold;
+  margin: 0 6px;
 }
 
 .remove-btn {
-  width:28px;
-  height:28px;
-  border-radius:50%;
-  border:1px solid #ccc;
-  background:#f5f5f5;
-  cursor:pointer;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid #ccc;
+  background: #f5f5f5;
+  cursor: pointer;
 }
 
-.remove-btn:hover { background:#e0e0e0; }
+.remove-btn:hover {
+  background: #e0e0e0;
+}
 
 .add-btn {
-  margin-top:6px;
-  padding:4px 10px;
-  border-radius:6px;
-  border:1px solid #ccc;
-  background:#f7f7f7;
-  cursor:pointer;
+  margin-top: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #f7f7f7;
+  cursor: pointer;
+}
+
+.add-btn:hover {
+  background: #eaeaea;
 }
 
 .actions {
-  display:flex;
-  gap:10px;
-  margin-top:14px;
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
 }
 
 button {
-  padding:6px 12px;
-  border-radius:6px;
-  border:1px solid #ccc;
-  background:#f7f7f7;
-  cursor:pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #f7f7f7;
+  cursor: pointer;
 }
 
 button:disabled {
-  background:#eee;
-  cursor:not-allowed;
+  background: #eee;
+  cursor: not-allowed;
 }
 
-#configsSection { display:none; }
+#configsSection {
+  display: none;
+}
 </style>
 </head>
 
@@ -208,24 +218,26 @@ const configsSection = document.getElementById("configsSection");
 const copyBtn = document.getElementById("copyBtn");
 const saveBtn = document.getElementById("saveBtn");
 
-function durationDropdown(){
-  let h = `<select class="duration"><option value="">Duration</option>`;
-  for(let i=5;i<=120;i+=5) h+=`<option>${i} minutes</option>`;
-  return h+`</select>`;
+function durationDropdown() {
+  let html = `<select class="duration"><option value="">Duration</option>`;
+  for (let i = 5; i <= 120; i += 5) {
+    html += `<option>${i} minutes</option>`;
+  }
+  return html + `</select>`;
 }
 
-function strategyDropdown(){
+function strategyDropdown() {
   return `<select class="strategy">
-    <option value="Any Room">Any Rooms</option>
+    <option value="Any Rooms">Any Rooms</option>
     <option value="All Rooms">All Rooms</option>
     <option value="Sequential">Sequential</option>
   </select>`;
 }
 
-function addOperatory(container){
+function addOperatory(container) {
   const row = document.createElement("div");
-  row.className="config-row";
-  row.innerHTML=`
+  row.className = "config-row";
+  row.innerHTML = `
     <input placeholder="Column / Operatory">
     ${durationDropdown()}
     ${strategyDropdown()}
@@ -233,39 +245,50 @@ function addOperatory(container){
     <button class="remove-btn">✕</button>
   `;
 
-  const strategy=row.querySelector(".strategy");
-  const arrow=row.querySelector(".arrow");
+  const strategy = row.querySelector(".strategy");
+  const arrow = row.querySelector(".arrow");
 
-  strategy.onchange=()=>{
-    if(strategy.value==="Sequential"){
-      arrow.style.display="inline";
+  strategy.onchange = () => {
+    if (strategy.value === "Sequential") {
+      arrow.style.display = "inline";
       addSequential(container);
-    } else arrow.style.display="none";
+    } else {
+      arrow.style.display = "none";
+    }
     validate();
   };
 
-  row.querySelector(".remove-btn").onclick=()=>{ row.remove(); validate(); };
-  row.querySelectorAll("input,select").forEach(e=>e.oninput=validate);
+  row.querySelector(".remove-btn").onclick = () => {
+    row.remove();
+    validate();
+  };
+
+  row.querySelectorAll("input, select").forEach(el => el.oninput = validate);
   container.appendChild(row);
 }
 
-function addSequential(container){
-  const row=document.createElement("div");
-  row.className="config-row";
-  row.innerHTML=`
+function addSequential(container) {
+  const row = document.createElement("div");
+  row.className = "config-row";
+  row.innerHTML = `
     <input placeholder="Column / Operatory">
     ${durationDropdown()}
     <button class="remove-btn">✕</button>
   `;
-  row.querySelector(".remove-btn").onclick=()=>{ row.remove(); validate(); };
-  row.querySelectorAll("input,select").forEach(e=>e.oninput=validate);
+
+  row.querySelector(".remove-btn").onclick = () => {
+    row.remove();
+    validate();
+  };
+
+  row.querySelectorAll("input, select").forEach(el => el.oninput = validate);
   container.appendChild(row);
 }
 
-function addProvider(){
-  const g=document.createElement("div");
-  g.className="provider-group";
-  g.innerHTML=`
+function addProvider() {
+  const group = document.createElement("div");
+  group.className = "provider-group";
+  group.innerHTML = `
     <div class="provider-header">
       <input class="provider-name" placeholder="Provider Name">
       <button class="remove-btn">✕</button>
@@ -273,89 +296,103 @@ function addProvider(){
     <div class="config-group"></div>
     <button class="add-btn">➕ Add Operatory</button>
   `;
-  const cg=g.querySelector(".config-group");
-  g.querySelector(".add-btn").onclick=()=>addOperatory(cg);
-  g.querySelector(".remove-btn").onclick=()=>{ g.remove(); validate(); };
-  g.querySelector(".provider-name").oninput=validate;
-  providersContainer.appendChild(g);
-  addOperatory(cg);
+
+  const configGroup = group.querySelector(".config-group");
+  group.querySelector(".add-btn").onclick = () => addOperatory(configGroup);
+  group.querySelector(".remove-btn").onclick = () => {
+    group.remove();
+    validate();
+  };
+  group.querySelector(".provider-name").oninput = validate;
+
+  providersContainer.appendChild(group);
+  addOperatory(configGroup);
 }
 
-document.querySelectorAll('input[name="calendarSync"]').forEach(r=>{
-  r.onchange=()=>{
-    configsSection.style.display = r.value==="Yes" ? "block":"none";
-    providersContainer.innerHTML="";
-    if(r.value==="Yes") addProvider();
+document.querySelectorAll('input[name="calendarSync"]').forEach(radio => {
+  radio.onchange = () => {
+    configsSection.style.display = radio.value === "Yes" ? "block" : "none";
+    providersContainer.innerHTML = "";
+    if (radio.value === "Yes") addProvider();
     validate();
   };
 });
 
-function validate(){
-  const required = [
-    integrationType.value,
-    integrationStatus.value,
-    document.querySelector('input[name="serverAccess"]:checked'),
-    document.querySelector('input[name="calendarSync"]:checked')
-  ].every(Boolean);
+function validate() {
+  const requiredFilled =
+    integrationType.value &&
+    integrationStatus.value &&
+    document.querySelector('input[name="serverAccess"]:checked') &&
+    document.querySelector('input[name="calendarSync"]:checked');
 
-  let providersOK=true;
-  if(document.querySelector('input[name="calendarSync"]:checked')?.value==="Yes"){
-    const groups=[...document.querySelectorAll(".provider-group")];
-    providersOK=groups.length>0 && groups.every(g=>{
-      if(!g.querySelector(".provider-name").value) return false;
-      const rows=[...g.querySelectorAll(".config-row")];
-      return rows.every(r=>{
-        return [...r.querySelectorAll("input,select")].every(e=>e.value);
-      });
+  let providersValid = true;
+  if (document.querySelector('input[name="calendarSync"]:checked')?.value === "Yes") {
+    const groups = [...document.querySelectorAll(".provider-group")];
+    providersValid = groups.length > 0 && groups.every(g => {
+      if (!g.querySelector(".provider-name").value) return false;
+      return [...g.querySelectorAll(".config-row")].every(r =>
+        [...r.querySelectorAll("input, select")].every(e => e.value)
+      );
     });
   }
 
-  copyBtn.disabled = !(required && providersOK);
-  saveBtn.disabled = !(required && providersOK);
+  copyBtn.disabled = !(requiredFilled && providersValid);
+  saveBtn.disabled = !(requiredFilled && providersValid);
 }
 
-function generateNote(){
-  const cal=document.querySelector('input[name="calendarSync"]:checked').value;
-  let txt=`Integration Type: ${integrationType.value}\n\n`;
-  txt+=`Contact Name: ${contactName.value}\n`;
-  txt+=`Phone Number: ${phoneNumber.value}\n`;
-  txt+=`Integration Status: ${integrationStatus.value}\n\n`;
-  txt+=`Server Access: ${document.querySelector('input[name="serverAccess"]:checked').value}\n`;
-  txt+=`Calendar Sync Configured: ${cal}\n\n`;
+function generateNote() {
+  const calendarSync = document.querySelector('input[name="calendarSync"]:checked').value;
+  let text = "";
 
-  if(cal==="Yes"){
-    txt+="Configs / Operatory Setup:\n";
-    document.querySelectorAll(".provider-group").forEach(g=>{
-      txt+=`${g.querySelector(".provider-name").value}:\n`;
-      const rows=[...g.querySelectorAll(".config-row")];
-      for(let i=0;i<rows.length;i++){
-        const r=rows[i];
-        const op=r.querySelector("input").value;
-        const dur=r.querySelector(".duration").value;
-        const strat=r.querySelector(".strategy")?.value;
-        if(strat==="Sequential"){
-          const r2=rows[++i];
-          txt+=`    ${op} ${dur} to ${r2.querySelector("input").value} ${r2.querySelector(".duration").value} | Sequential\n`;
+  text += `Integration Type: ${integrationType.value}\n\n`;
+  text += `Contact Name: ${contactName.value}\n`;
+  text += `Phone Number: ${phoneNumber.value}\n`;
+  text += `Integration Status: ${integrationStatus.value}\n\n`;
+  text += `Server Access: ${document.querySelector('input[name="serverAccess"]:checked').value}\n`;
+  text += `Calendar Sync Configured: ${calendarSync}\n\n`;
+
+  if (calendarSync === "Yes") {
+    text += `Configs / Operatory Setup:\n`;
+    document.querySelectorAll(".provider-group").forEach(group => {
+      text += `${group.querySelector(".provider-name").value}:\n`;
+      const rows = [...group.querySelectorAll(".config-row")];
+
+      for (let i = 0; i < rows.length; i++) {
+        const r = rows[i];
+        const op = r.querySelector("input").value;
+        const dur = r.querySelector(".duration").value;
+        const strat = r.querySelector(".strategy")?.value;
+
+        if (strat === "Sequential") {
+          const r2 = rows[++i];
+          text += `    ${op} ${dur} to ${r2.querySelector("input").value} ${r2.querySelector(".duration").value} | Sequential\n`;
         } else {
-          txt+=`    ${op} ${dur} | ${strat}\n`;
+          text += `    ${op} ${dur} | ${strat}\n`;
         }
       }
     });
-    txt+="\n";
+    text += "\n";
   }
 
-  txt+=`Blocker:\n${blocker.value}\n\nSetup Summary:\n${setupSummary.value}`;
-  return txt.trim();
+  text += `Blocker:\n${blocker.value}\n\n`;
+  text += `Setup Summary:\n${setupSummary.value}`;
+
+  return text.trim();
 }
 
-copyBtn.onclick=async()=>{ await navigator.clipboard.writeText(generateNote()); alert("Copied"); };
-saveBtn.onclick=()=>{
-  const blob=new Blob([generateNote()],{type:"text/plain"});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download=(practiceName.value||"EZ_Note")+".txt";
+copyBtn.onclick = async () => {
+  await navigator.clipboard.writeText(generateNote());
+  alert("Copied to clipboard");
+};
+
+saveBtn.onclick = () => {
+  const blob = new Blob([generateNote()], { type: "text/plain" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = (practiceName.value || "EZ_Note") + ".txt";
   a.click();
 };
 </script>
+
 </body>
 </html>
