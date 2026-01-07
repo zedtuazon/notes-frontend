@@ -17,6 +17,7 @@ select { max-width: 260px; }
 .no { color: red; font-weight: bold; }
 
 .provider-group { margin-top: 12px; padding: 6px 0; border-bottom: 1px solid #ddd; display: flex; flex-direction: column; gap: 6px; position: relative; }
+.provider-header { display:flex; align-items:center; gap:6px; justify-content: space-between; }
 .config-row { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
 .config-row input { width: 40%; }
 .config-row select.duration { width: 100px; }
@@ -24,8 +25,8 @@ select { max-width: 260px; }
 .arrow { font-weight: bold; color: #555; margin: 0 5px; }
 .remove-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #ccc; background: #f5f5f5; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
 .remove-btn:hover { background: #e0e0e0; }
-.add-btn { padding: 4px 10px; border-radius: 6px; border: 1px solid #ccc; background:#f7f7f7; cursor:pointer; font-size:14px; align-self:flex-start; margin-top:6px; }
-.add-btn:hover { background:#eaeaea; }
+.add-btn { padding: 4px 10px; border-radius: 6px; border: 1px solid #ccc; background:#f7f7f7; cursor:pointer; font-size:14px; margin-top:6px; transition: all 0.2s; }
+.add-btn:hover { background:#e0f0ff; border-color:#4a90e2; }
 button { margin-top: 12px; padding: 6px 12px; font-size: 13px; cursor: pointer; border-radius: 4px; border: 1px solid #ccc; background: #f7f7f7; display:flex; align-items:center; gap:6px; }
 button:disabled { background:#f0f0f0; cursor:not-allowed; }
 .actions { display: flex; gap: 10px; margin-top: 14px; }
@@ -159,7 +160,7 @@ function addProvider(){
   const providerGroup = document.createElement("div");
   providerGroup.className = "provider-group";
   providerGroup.innerHTML = `
-    <div style="display:flex; align-items:center; gap:6px;">
+    <div class="provider-header">
       <input class="provider-name" placeholder="Provider Name">
       <button class="remove-btn">✕</button>
     </div>
@@ -170,6 +171,7 @@ function addProvider(){
   const addBtn = providerGroup.querySelector(".add-btn");
   const removeBtn = providerGroup.querySelector(".remove-btn");
 
+  addBtn.style.alignSelf="flex-end"; // right-align button
   addBtn.onclick = ()=>addOperatoryRow(configGroup,false);
   removeBtn.onclick = ()=>{ providerGroup.remove(); validateFields(); };
 
