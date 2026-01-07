@@ -220,20 +220,44 @@ document.querySelectorAll('input[name="calendarSync"]').forEach(r=>{
   };
 });
 
-/* Generate full note */
+/* Generate full note with combined sequential rows */
 function generateCurrentNote(){
   const serverAccess = document.querySelector('input[name="serverAccess"]:checked')?.value || "Not set";
   const calendarSync = document.querySelector('input[name="calendarSync"]:checked')?.value || "Not set";
 
   let configsText = "- N/A";
-  if(calendarSync==="Yes"){
+  if(calendarSync === "Yes"){
     const rows = [...document.querySelectorAll(".config-row")];
-    configsText = rows.map((r, i)=>{
-      const op = r.querySelector("input")?.value || "";
-      const dur = r.querySelector(".duration")?.value || "";
-      const strat = r.querySelector(".strategy")?.value || "";
-      return `- ${op} | ${dur}${strat ? " | "+strat : ""}`;
-    }).join("\n");
+    let result = [];
+    let i = 0;
+
+    while(i < rows.length){
+      const row = rows[i];
+      const op = row.querySelector("input")?.value || "";
+      const dur = row.querySelector(".duration")?.value.replace("mins","minutes") || "";
+      const strat = row.querySelector(".strategy")?.value || "";
+
+      // Sequential logic
+      if(strat === "Sequential"){
+        const nextRow = rows[i+1];
+        if(nextRow){
+          const nextOp = nextRow.querySelector("input")?.value || "";
+          const nextDur = nextRow.querySelector(".duration")?.value.replace("mins","minutes") || "";
+          result.push(`${op} ${dur} to ${nextOp} ${nextDur} | Sequential Room`);
+          i += 2; // skip next row
+          continue;
+        } else {
+          result.push(`${op} ${dur} | Sequential Room`);
+        }
+      } else if(strat){
+        result.push(`${op} ${dur} | ${strat.replace("s","")} Room`);
+      } else {
+        result.push(`${op} ${dur}`);
+      }
+      i++;
+    }
+
+    configsText = result.join("\n");
   }
 
   return `
@@ -279,7 +303,7 @@ function validateFields(){
   saveFileBtn.disabled = !required;
 }
 
-/* Copy to Clipboard button */
+/* Copy to Clipboard */
 copyBtn.onclick = async () => {
   const note = generateCurrentNote();
   await navigator.clipboard.writeText(note);
