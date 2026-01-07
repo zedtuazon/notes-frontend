@@ -5,210 +5,196 @@
 <title>EZ Note Generator</title>
 
 <style>
-body { font-family: Arial; max-width: 860px; margin: auto; padding: 18px; font-size: 14px; background:#fdfdfd; }
-.header { display: flex; justify-content: center; align-items: center; gap: 10px; font-size: 28px; font-weight: bold; margin-bottom: 16px; }
-.header span.icon { font-size: 32px; }
-
-.note-type-buttons { display:flex; gap:8px; justify-content:center; margin-bottom:16px; }
-.note-type-buttons button { padding:6px 12px; font-size:14px; border-radius:4px; border:1px solid #ccc; background:#f7f7f7; cursor:pointer; }
-.note-type-buttons button.active { background:#4a90e2; color:white; border-color:#4a90e2; }
-.note-type-section { display:none; }
-.note-type-section.active { display:block; }
-
-label.section { font-weight: bold; margin-top: 12px; display: block; }
-input, select, textarea { padding:6px; margin-top:4px; font-size:14px; border:1px solid #ccc; border-radius:6px; }
-textarea { min-height:80px; width:100%; resize:vertical; }
-select { max-width:260px; }
-
-.contact-row { display:flex; gap:12px; }
-.contact-row input { flex:1; }
-
-.radio-group { display:flex; gap:16px; margin-top:6px; flex-wrap: wrap; }
-.config-row { display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap: wrap; }
-
-.config-row input { width:40%; }
-.config-row select.duration { width:100px; }
-.config-row select.strategy { width:140px; }
-
-.arrow { font-weight:bold; margin:0 4px; }
-.remove-btn { width:28px; height:28px; border-radius:50%; cursor:pointer; }
-
-.actions { display:flex; gap:10px; margin-top:14px; }
+body{font-family:Arial;max-width:860px;margin:auto;padding:18px;font-size:14px}
+.header{display:flex;justify-content:center;gap:10px;font-size:28px;font-weight:bold;margin-bottom:16px}
+.note-type-buttons{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
+.note-type-buttons button{padding:6px 12px;border-radius:4px;border:1px solid #ccc;cursor:pointer}
+.note-type-buttons .active{background:#4a90e2;color:#fff}
+.note-type-section{display:none}
+.note-type-section.active{display:block}
+label.section{font-weight:bold;margin-top:12px;display:block}
+input,select,textarea{padding:6px;margin-top:4px;border-radius:6px;border:1px solid #ccc}
+textarea{width:100%;min-height:80px}
+.radio-group{display:flex;gap:16px;margin-top:6px;flex-wrap:wrap}
+.config-row{display:flex;gap:8px;margin-top:8px;align-items:center}
+.config-row input{width:38%}
+.duration{width:100px}
+.strategy{width:140px}
+.arrow{font-weight:bold}
+.remove-btn{width:28px;height:28px;border-radius:50%;border:1px solid #ccc;cursor:pointer}
+.actions{display:flex;gap:10px;margin-top:14px}
 </style>
 </head>
 
 <body>
 
-<div class="header">
-  <span class="icon">📝</span> EZ Note Generator
-</div>
+<div class="header">📝 EZ Note Generator</div>
 
 <div class="note-type-buttons">
-  <button id="btnIntegrationNote" class="active">Integration Notes</button>
-  <button id="btnCalendarNote">Calendar/Resync Notes</button>
-  <button id="btnOnboardingNote">Onboarding Notes</button>
+<button id="btnIntegration" class="active">Integration Note</button>
+<button id="btnCalendar">Calendar / Resync</button>
+<button id="btnOnboarding">Onboarding</button>
 </div>
 
-<div id="sectionIntegrationNote" class="note-type-section active">
+<!-- ================= INTEGRATION NOTE ================= -->
+<div id="integration" class="note-type-section active">
 
 <label class="section">Practice Name</label>
 <input id="practiceName">
 
 <label class="section">Integration Type</label>
 <select id="integrationType">
-  <option value="" disabled selected>Select Integration Type</option>
-  <option>Opencare Sync</option>
-  <option>NexHealth API</option>
-  <option>Sikka API</option>
-  <option>Carestack API</option>
-  <option>Denticon API</option>
-  <option>Opendental API</option>
+<option value="">Select</option>
+<option>Opencare Sync</option>
+<option>NexHealth API</option>
+<option>Sikka API</option>
+<option>Carestack API</option>
+<option>Denticon API</option>
+<option>OpenDental API</option>
 </select>
 
-<label class="section">Contact Info</label>
-<div class="contact-row">
-  <input id="contactName" placeholder="Contact Name">
-  <input id="phoneNumber" placeholder="Phone Number">
-</div>
+<label class="section">Contact</label>
+<input id="contactName" placeholder="Name">
+<input id="phoneNumber" placeholder="Phone">
 
 <label class="section">Integration Status</label>
 <select id="integrationStatus">
-  <option value="" disabled selected>Select status</option>
-  <option>Pending</option>
-  <option>Active</option>
-  <option>Stalled</option>
+<option value="">Select</option>
+<option>Pending</option>
+<option>Active</option>
+<option>Stalled</option>
 </select>
 
 <label class="section">Server Access</label>
 <div class="radio-group">
-  <label><input type="radio" name="serverAccess" value="Yes"> Yes</label>
-  <label><input type="radio" name="serverAccess" value="No"> No</label>
+<label><input type="radio" name="serverAccess" value="Yes"> Yes</label>
+<label><input type="radio" name="serverAccess" value="No"> No</label>
 </div>
 
 <label class="section">Calendar Sync Configured</label>
 <div class="radio-group">
-  <label><input type="radio" name="calendarSync" value="Yes"> Yes</label>
-  <label><input type="radio" name="calendarSync" value="No"> No</label>
+<label><input type="radio" name="calendarSync" value="Yes"> Yes</label>
+<label><input type="radio" name="calendarSync" value="No"> No</label>
 </div>
 
 <label class="section">Configs / Operatory Setup</label>
-<div id="configsContainer"></div>
-<button id="addOperatoryBtn">➕ Add Operatory</button>
+<div id="configs"></div>
+<button onclick="addConfig()">➕ Add Operatory</button>
 
 <label class="section">Blocker</label>
 <textarea id="blocker"></textarea>
 
 <label class="section">Setup Summary</label>
-<textarea id="setupSummary"></textarea>
+<textarea id="summary"></textarea>
 
 <div class="actions">
-  <button id="copyBtn" disabled>📋 Copy</button>
-  <button id="saveFileBtn" disabled>💾 Save</button>
+<button id="copyBtn" disabled>📋 Copy</button>
+<button id="saveBtn" disabled>💾 Save</button>
+</div>
 </div>
 
+<!-- ================= CALENDAR NOTE ================= -->
+<div id="calendar" class="note-type-section">
+<textarea placeholder="- Calendar / resync notes"></textarea>
+</div>
+
+<!-- ================= ONBOARDING ================= -->
+<div id="onboarding" class="note-type-section">
+<input id="onName" placeholder="Contact Name">
+<input id="onSentiment" placeholder="Sentiment">
+<input id="onTech" placeholder="Tech Ability">
+<input id="onPhone" placeholder="Phone">
+<textarea id="onNotes" placeholder="- Notes"></textarea>
 </div>
 
 <script>
-console.log("EZ Note Generator JS loaded");
-
-const configsContainer = document.getElementById("configsContainer");
-const addOperatoryBtn = document.getElementById("addOperatoryBtn");
-const copyBtn = document.getElementById("copyBtn");
-const saveFileBtn = document.getElementById("saveFileBtn");
-
-function durationDropdown(){
-  let html = `<select class="duration"><option value="">Duration</option>`;
-  for(let i=5;i<=120;i+=5) html += `<option>${i} mins</option>`;
-  return html + `</select>`;
-}
-
-function strategyDropdown(){
-  return `<select class="strategy">
-    <option value="Any Room">Any Room</option>
-    <option value="All Rooms">All Rooms</option>
-    <option value="Sequential">Sequential</option>
-  </select>`;
-}
-
-function addConfig(isSequentialSecond=false){
-  const row = document.createElement("div");
-  row.className = "config-row";
-
-  const strategyHtml = isSequentialSecond ? "" : strategyDropdown();
-  const arrowHtml = isSequentialSecond
-    ? `<span class="arrow">→</span>`
-    : `<span class="arrow" style="display:none;">→</span>`;
-
-  row.innerHTML = `
-    <input placeholder="Column / Operatory">
-    ${durationDropdown()}
-    ${strategyHtml}
-    ${arrowHtml}
-    <button class="remove-btn">✕</button>
-  `;
-
-  const strategy = row.querySelector(".strategy");
-  const arrow = row.querySelector(".arrow");
-
-  row.querySelector(".remove-btn").onclick = () => {
-    const rows = [...document.querySelectorAll(".config-row")];
-    const i = rows.indexOf(row);
-    if(strategy?.value==="Sequential" && rows[i+1]) rows[i+1].remove();
-    row.remove();
-    validate();
-  };
-
-  if(strategy){
-    strategy.addEventListener("change",()=>{
-      const rows = [...document.querySelectorAll(".config-row")];
-      const i = rows.indexOf(row);
-      if(strategy.value==="Sequential"){
-        arrow.style.display="inline";
-        if(!rows[i+1]) addConfig(true);
-      } else {
-        arrow.style.display="none";
-        if(rows[i+1] && !rows[i+1].querySelector(".strategy")) rows[i+1].remove();
-      }
-      validate();
-    });
-  }
-
-  configsContainer.appendChild(row);
-  validate();
-}
-
-function toggleConfigs(val){
-  if(val==="No"){
-    configsContainer.innerHTML = "- N/A";
-    addOperatoryBtn.style.display = "none";
-  } else if(val==="Yes"){
-    configsContainer.innerHTML = "";
-    addOperatoryBtn.style.display = "inline-block";
-    addConfig();
-  } else {
-    configsContainer.innerHTML = "";
-    addOperatoryBtn.style.display = "none";
-  }
-  validate();
-}
-
-document.querySelectorAll('input[name="calendarSync"]').forEach(r=>{
-  r.addEventListener("change",()=>toggleConfigs(r.value));
+const tabs=[
+{b:'btnIntegration',s:'integration'},
+{b:'btnCalendar',s:'calendar'},
+{b:'btnOnboarding',s:'onboarding'}
+];
+tabs.forEach(t=>{
+document.getElementById(t.b).onclick=()=>{
+tabs.forEach(x=>{
+document.getElementById(x.b).classList.remove('active');
+document.getElementById(x.s).classList.remove('active');
+});
+document.getElementById(t.b).classList.add('active');
+document.getElementById(t.s).classList.add('active');
+};
 });
 
-addOperatoryBtn.onclick = () => addConfig();
+const configs=document.getElementById("configs");
 
-function validate(){
-  const ok =
-    integrationType.value &&
-    integrationStatus.value &&
-    document.querySelector('input[name="serverAccess"]:checked') &&
-    document.querySelector('input[name="calendarSync"]:checked');
-  copyBtn.disabled = !ok;
-  saveFileBtn.disabled = !ok;
+function durationSelect(){
+let o='<select class="duration"><option value="">Duration</option>';
+for(let i=5;i<=120;i+=5)o+=`<option>${i} mins</option>`;
+return o+'</select>';
+}
+function strategySelect(){
+return `<select class="strategy">
+<option>Any Room</option>
+<option>All Rooms</option>
+<option>Sequential</option>
+</select>`;
 }
 
-toggleConfigs(null);
+function addConfig(sequential=false){
+const row=document.createElement("div");
+row.className="config-row";
+row.innerHTML=`
+<input placeholder="Column / Operatory">
+${durationSelect()}
+${sequential?'':strategySelect()}
+<span class="arrow" style="display:${sequential?'inline':'none'}">→</span>
+<button class="remove-btn">✕</button>
+`;
+
+row.querySelector(".remove-btn").onclick=()=>{
+const rows=[...configs.children];
+const i=rows.indexOf(row);
+if(row.querySelector(".strategy")?.value==="Sequential" && rows[i+1])
+rows[i+1].remove();
+row.remove();
+validate();
+};
+
+const strat=row.querySelector(".strategy");
+if(strat){
+strat.onchange=()=>{
+const rows=[...configs.children];
+const i=rows.indexOf(row);
+if(strat.value==="Sequential"){
+row.querySelector(".arrow").style.display="inline";
+if(!rows[i+1]) addConfig(true);
+}else{
+row.querySelector(".arrow").style.display="none";
+if(rows[i+1] && !rows[i+1].querySelector(".strategy"))
+rows[i+1].remove();
+}
+validate();
+};
+}
+
+configs.appendChild(row);
+validate();
+}
+
+function validate(){
+const required=
+integrationType.value &&
+integrationStatus.value &&
+document.querySelector('input[name="serverAccess"]:checked') &&
+document.querySelector('input[name="calendarSync"]:checked') &&
+configs.children.length>0;
+copyBtn.disabled=!required;
+saveBtn.disabled=!required;
+}
+
+configs.addEventListener("input",validate);
+document.querySelectorAll("input,select").forEach(e=>e.onchange=validate);
+
+addConfig();
 </script>
 
 </body>
