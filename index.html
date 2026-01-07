@@ -1,3 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>EZ Note Generator</title>
+<style>
+body { font-family: Arial; max-width: 1000px; margin: auto; padding: 18px; background: #fdfdfd; }
+.header { display: flex; justify-content: center; align-items: center; gap: 10px; font-size: 28px; font-weight: bold; margin-bottom: 16px; }
+.nav-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
+.nav-buttons button { padding: 6px 12px; border-radius: 6px; border: 1px solid #ccc; background: #f7f7f7; cursor: pointer; }
+.nav-buttons button.active { background: #e0f0ff; border-color: #4a90e2; }
+#content { border-top: 1px solid #ddd; padding-top: 16px; }
+</style>
+</head>
+<body>
 
+<div class="header">📝 EZ Note Generator</div>
 
+<div class="nav-buttons">
+  <button id="btnIntegration" class="active">Integration Notes</button>
+  <button id="btnCalendar">Calendar Updates Notes</button>
+  <button id="btnOnboarding">Onboarding Notes</button>
+</div>
 
+<div id="content">
+  <!-- Loaded page content will appear here -->
+</div>
+
+<script>
+const contentDiv = document.getElementById("content");
+const buttons = {
+  btnIntegration: "integration.html",
+  btnCalendar: "calendar.html",     // create this later
+  btnOnboarding: "onboarding.html"  // create this later
+};
+
+function loadPage(buttonId){
+  // Remove active class from all buttons
+  Object.keys(buttons).forEach(id=>document.getElementById(id).classList.remove("active"));
+  // Add active to clicked button
+  document.getElementById(buttonId).classList.add("active");
+
+  // Fetch HTML content
+  fetch(buttons[buttonId])
+    .then(res => res.text())
+    .then(html => contentDiv.innerHTML = html)
+    .catch(err => contentDiv.innerHTML = `<p style="color:red;">Failed to load page: ${err}</p>`);
+}
+
+// Set up event listeners
+Object.keys(buttons).forEach(id => {
+  document.getElementById(id).onclick = () => loadPage(id);
+});
+
+// Load Integration Notes by default
+loadPage("btnIntegration");
+</script>
+
+</body>
+</html>
