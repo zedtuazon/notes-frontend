@@ -95,10 +95,10 @@ button:disabled { background:#f0f0f0; cursor:not-allowed; }
 </div>
 
 <label class="section">Blocker</label>
-<textarea id="blocker" placeholder="• "></textarea>
+<textarea id="blocker" placeholder=""></textarea>
 
 <label class="section">Setup Summary</label>
-<textarea id="setupSummary" placeholder="• "></textarea>
+<textarea id="setupSummary" placeholder=""></textarea>
 
 <div class="actions">
   <button id="copyBtn" disabled>📋 Copy to Clipboard</button>
@@ -124,7 +124,7 @@ const saveFileBtn = document.getElementById("saveFileBtn");
 
 // Duration & Strategy
 function durationDropdown(){ let html = `<select class="duration"><option value="">Duration</option>`; for(let i=5;i<=120;i+=5) html+=`<option>${i} minutes</option>`; return html+`</select>`; }
-function strategyDropdown(){ return `<select class="strategy"><option value="Any Room">Any Room</option><option value="All Rooms">All Rooms</option><option value="Sequential">Sequential</option></select>`; }
+function strategyDropdown(){ return `<select class="strategy"><option value="Any Room">Any Rooms</option><option value="All Rooms">All Rooms</option><option value="Sequential">Sequential</option></select>`; }
 
 // Add Operatory Row
 function addOperatoryRow(container,isSequential=false){
@@ -165,14 +165,18 @@ function addProvider(){
 }
 
 // Calendar Sync toggle
-document.querySelectorAll('input[name="calendarSync"]').forEach(r=>{ r.onchange=()=>{
-  if(r.value==="Yes"){ configsSection.style.display="block"; if(providersContainer.children.length===0) addProvider(); }
-  else{configsSection.style.display="none"; providersContainer.innerHTML="";} validateFields();
-};});
-
-// Auto bullets
-function enableAutoBullets(textarea){ textarea.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); const start=textarea.selectionStart,end=textarea.selectionEnd; textarea.value=textarea.value.slice(0,start)+"\n• "+textarea.value.slice(end); textarea.selectionStart=textarea.selectionEnd=start+3; } }); }
-enableAutoBullets(blocker); enableAutoBullets(setupSummary);
+document.querySelectorAll('input[name="calendarSync"]').forEach(r=>{
+  r.onchange = () => {
+    if(r.value === "Yes"){
+      configsSection.style.display = "block";
+      if(providersContainer.children.length === 0) addProvider();
+    } else {
+      configsSection.style.display = "none";
+      providersContainer.innerHTML = "";
+    }
+    validateFields();
+  };
+});
 
 // Validation
 function validateFields(){
@@ -185,14 +189,11 @@ function validateFields(){
   if(calendarSyncVal === "Yes"){
     const groups = [...document.querySelectorAll(".provider-group")];
     if(groups.length === 0) providersFilled = false;
-
     groups.forEach(g => {
       const pname = g.querySelector(".provider-name")?.value;
       if(!pname) providersFilled = false;
-
       const rows = [...g.querySelectorAll(".config-row")];
       if(rows.length === 0) providersFilled = false;
-
       let i=0;
       while(i<rows.length){
         const row=rows[i];
@@ -200,7 +201,6 @@ function validateFields(){
         const dur=row.querySelector(".duration")?.value;
         const strat=row.querySelector(".strategy")?.value;
         if(!col||!dur) providersFilled=false;
-
         if(strat==="Sequential" && rows[i+1]){
           const nextRow=rows[i+1]; const nextCol=nextRow.querySelector("input")?.value; const nextDur=nextRow.querySelector(".duration")?.value;
           if(!nextCol||!nextDur) providersFilled=false;
@@ -220,42 +220,43 @@ function validateFields(){
 function generateCurrentNote(){
   const serverAccess=document.querySelector('input[name="serverAccess"]:checked')?.value || "Not set";
   const calendarSync=document.querySelector('input[name="calendarSync"]:checked')?.value || "Not set";
-  let configsText="• N/A";
+  let configsText = "";
   if(calendarSync==="Yes"){
-    configsText="";
     const providerGroups=[...document.querySelectorAll(".provider-group")];
-    providerGroups.forEach(group=>{
-      const providerName=group.querySelector(".provider-name")?.value || ""; if(!providerName) return;
-      configsText+=providerName+":\n";
-      const rows=[...group.querySelectorAll(".config-row")];
-      let i=0;
-      while(i<rows.length){
-        const row=rows[i];
-        const operatory=row.querySelector("input")?.value || "";
-        const dur=row.querySelector(".duration")?.value || "";
-        const strat=row.querySelector(".strategy")?.value || "";
+    if(providerGroups.length === 0){ configsText = "N/A"; }
+    else{
+      providerGroups.forEach(group=>{
+        const providerName = group.querySelector(".provider-name")?.value || "";
+        if(!providerName) return;
+        configsText += providerName + ":\n";
+        const rows = [...group.querySelectorAll(".config-row")];
+        let i = 0;
+        while(i < rows.length){
+          const row = rows[i];
+          const operatory = row.querySelector("input")?.value || "";
+          const dur = row.querySelector(".duration")?.value || "";
+          const strat = row.querySelector(".strategy")?.value || "";
 
-        // Sequential logic
-        if(strat==="Sequential" && rows[i+1]){
-          const nextRow=rows[i+1];
-          const nextOperatory=nextRow.querySelector("input")?.value || "";
-          const nextDur=nextRow.querySelector(".duration")?.value || "";
-          configsText+=`    ${operatory} ${dur} to ${nextOperatory} ${nextDur} | Sequential\n`;
-          i+=2; continue;
+          if(strat === "Sequential" && rows[i+1]){
+            const nextRow = rows[i+1];
+            const nextOperatory = nextRow.querySelector("input")?.value || "";
+            const nextDur = nextRow.querySelector(".duration")?.value || "";
+            configsText += `    ${operatory} ${dur} to ${nextOperatory} ${nextDur} | Sequential\n`;
+            i += 2; continue;
+          }
+
+          let stratText = "";
+          if(strat){
+            if(strat==="Sequential") stratText="Sequential";
+            else if(strat==="All Rooms") stratText="All Rooms";
+            else if(strat==="Any Room") stratText="Any Rooms";
+          }
+
+          configsText += `    ${operatory} ${dur}` + (stratText?` | ${stratText}`:"") + "\n";
+          i++;
         }
-
-        // Strategy text fix
-        let stratText="";
-        if(strat){
-          if(strat==="Sequential") stratText="Sequential";
-          else if(strat==="All Rooms") stratText="All Rooms";
-          else if(strat==="Any Room") stratText="Any Rooms";
-        }
-
-        configsText+=`    ${operatory} ${dur}` + (stratText?` | ${stratText}`:"") + "\n";
-        i++;
-      }
-    });
+      });
+    }
   }
 
   return `
@@ -268,8 +269,7 @@ Integration Status: ${integrationStatus.value || "Not set"}
 Server Access: ${serverAccess}
 Calendar Sync Configured: ${calendarSync}
 
-Configs / Operatory Setup:
-${configsText}
+${calendarSync==="Yes"?"Configs / Operatory Setup:\n"+configsText:""}
 
 Blocker:
 ${blocker.value}
