@@ -1,21 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <title>EZ Note Generator</title>
 
 <style>
 body {
   font-family: Arial, sans-serif;
-  max-width: 960px;
+  max-width: 980px;
   margin: auto;
   padding: 20px;
-  background: #fff;
 }
 
 h1 {
   text-align: center;
-  font-size: 28px;
+  font-size: 30px;
   margin-bottom: 16px;
 }
 
@@ -23,27 +22,25 @@ h1 {
   display: flex;
   justify-content: center;
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .tabs button {
   padding: 8px 14px;
   border-radius: 6px;
   border: 1px solid #ccc;
-  background: #f3f3f3;
+  background: #f2f2f2;
   cursor: pointer;
 }
 
 .tabs button.active {
-  background: #4a90e2;
-  color: white;
-  border-color: #4a90e2;
+  background: #2563eb;
+  color: #fff;
 }
 
 .section {
   display: none;
 }
-
 .section.active {
   display: block;
 }
@@ -57,10 +54,10 @@ label {
 input, select, textarea {
   width: 100%;
   padding: 7px;
-  font-size: 14px;
   margin-top: 6px;
   border-radius: 6px;
   border: 1px solid #ccc;
+  font-size: 14px;
 }
 
 textarea {
@@ -72,13 +69,9 @@ textarea {
   gap: 12px;
 }
 
-.row input {
-  flex: 1;
-}
-
 .radio-group {
   display: flex;
-  gap: 20px;
+  gap: 18px;
   margin-top: 6px;
 }
 
@@ -93,33 +86,26 @@ textarea {
 }
 
 .config-row input { flex: 1; }
-
-.config-row select {
-  width: 120px;
-}
+.config-row select { width: 130px; }
 
 .remove {
-  cursor: pointer;
   border: none;
   background: #eee;
   border-radius: 50%;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
 }
 
 .actions {
   display: flex;
   gap: 10px;
-  margin-top: 16px;
+  margin-top: 18px;
 }
 
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-.insurance-list {
-  margin-left: 18px;
 }
 
 .insurance-item {
@@ -133,7 +119,7 @@ button:disabled {
 
 <body>
 
-<h1>📝 EZ Note Generator</h1>
+<h1>EZ Note Generator</h1>
 
 <div class="tabs">
   <button class="active" onclick="switchTab('integration')">Integration Note</button>
@@ -141,11 +127,11 @@ button:disabled {
   <button onclick="switchTab('onboarding')">Onboarding Notes</button>
 </div>
 
-<!-- ================= INTEGRATION NOTES ================= -->
+<!-- ================= INTEGRATION ================= -->
 <div id="integration" class="section active">
 
 <label>Practice Name</label>
-<input id="practiceName" placeholder="Used for file name only" />
+<input id="practiceName" placeholder="Used for file name only">
 
 <label>Integration Type</label>
 <select id="integrationType">
@@ -160,8 +146,8 @@ button:disabled {
 
 <label>Contact Info</label>
 <div class="row">
-  <input id="contactName" placeholder="Contact Name" />
-  <input id="phone" placeholder="Phone Number" />
+  <input id="contactName" placeholder="Contact Name">
+  <input id="phone" placeholder="Phone Number">
 </div>
 
 <label>Calendar Sync Configured</label>
@@ -175,44 +161,41 @@ button:disabled {
 <button onclick="addConfig()">➕ Add Operatory</button>
 
 <label style="margin-top:16px;">Blocker</label>
-<textarea id="blocker" placeholder="• "></textarea>
+<textarea id="blocker" placeholder="• NA"></textarea>
 
-<label style="margin-top:16px;">Setup Summary</label>
-<textarea id="summary" placeholder="• "></textarea>
+<label style="margin-top:20px;">Setup Summary</label>
+<textarea id="summary" placeholder="• NA"></textarea>
 
 <div class="actions">
-  <button id="copyIntegration" disabled onclick="copyIntegration()">📋 Copy</button>
-  <button id="saveIntegration" disabled onclick="saveIntegration()">💾 Save</button>
+  <button id="copyIntegration" disabled onclick="copyIntegration()">📋 Copy to Clipboard</button>
+  <button id="saveIntegration" disabled onclick="saveIntegration()">💾 Save to File</button>
 </div>
-
 </div>
 
 <!-- ================= CALENDAR ================= -->
 <div id="calendar" class="section">
-  <p style="text-align:center;color:#888;">Coming soon</p>
+  <p style="text-align:center;color:#777;">Coming soon</p>
 </div>
 
 <!-- ================= ONBOARDING ================= -->
 <div id="onboarding" class="section">
 
 <label>Main Contact Name</label>
-<input id="obName" />
+<input id="obName">
 
 <label>Phone Number</label>
-<input id="obPhone" />
+<input id="obPhone">
 
 <label>Sentiment</label>
-<input id="obSentiment" />
+<input id="obSentiment">
 
 <label>Tech Ability</label>
-<input id="obTech" />
+<input id="obTech">
 
 <label>Insurances Added</label>
-<div class="insurance-list">
-  <div class="insurance-item">• Aetna Dental PPO <input type="radio" name="aetna" value="Yes"> Yes <input type="radio" name="aetna" value="No"> No</div>
-  <div class="insurance-item">• Cigna Dental PPO <input type="radio" name="cigna" value="Yes"> Yes <input type="radio" name="cigna" value="No"> No</div>
-  <div class="insurance-item">• Delta Dental PPO <input type="radio" name="delta" value="Yes"> Yes <input type="radio" name="delta" value="No"> No</div>
-</div>
+<div class="insurance-item">• Aetna Dental PPO <input type="radio" name="aetna"> Yes <input type="radio" name="aetna"> No</div>
+<div class="insurance-item">• Cigna Dental PPO <input type="radio" name="cigna"> Yes <input type="radio" name="cigna"> No</div>
+<div class="insurance-item">• Delta Dental PPO <input type="radio" name="delta"> Yes <input type="radio" name="delta"> No</div>
 
 <label>Meeting Context Notes + Remaining Actions</label>
 <textarea id="obMeeting">• Made sure provider info is updated
@@ -224,7 +207,6 @@ button:disabled {
   <button id="copyOnboarding" disabled onclick="copyOnboarding()">📋 Copy</button>
   <button id="saveOnboarding" disabled onclick="saveOnboarding()">💾 Save</button>
 </div>
-
 </div>
 
 <script>
@@ -237,13 +219,12 @@ function switchTab(tab) {
 }
 
 function addConfig() {
-  const div = document.createElement('div');
-  div.className = 'config-row';
-  div.innerHTML = `
-    <input placeholder="Operatory" />
+  const row = document.createElement('div');
+  row.className = 'config-row';
+  row.innerHTML = `
+    <input placeholder="Operatory">
     <select>
-      <option>5 mins</option><option>10 mins</option><option>15 mins</option>
-      <option>30 mins</option><option>60 mins</option>
+      ${[5,10,15,20,25,30,45,60,90,120].map(m=>`<option>${m} mins</option>`).join('')}
     </select>
     <select onchange="handleSequential(this)">
       <option>Any Room</option>
@@ -252,22 +233,26 @@ function addConfig() {
     </select>
     <button class="remove" onclick="this.parentElement.remove();validate()">✖</button>
   `;
-  document.getElementById('configs').appendChild(div);
+  document.getElementById('configs').appendChild(row);
   validate();
 }
 
 function handleSequential(sel) {
-  if (sel.value === 'Sequential') addConfig();
+  const rows = document.querySelectorAll('.config-row');
+  if (sel.value === "Sequential" && sel.parentElement === rows[rows.length - 1]) {
+    addConfig();
+  }
 }
 
 function copyIntegration() {
   let text = `Integration Type: ${integrationType.value}\n\nConfigs / Operatory Setup:\n`;
-  document.querySelectorAll('.config-row').forEach((r,i,a)=>{
+  const rows = document.querySelectorAll('.config-row');
+  rows.forEach((r,i)=>{
     const op = r.children[0].value;
     const dur = r.children[1].value;
     const strat = r.children[2].value;
-    if(strat==="Sequential" && a[i+1]){
-      text += `• ${op} | ${dur} To ${a[i+1].children[0].value} | ${a[i+1].children[1].value} Sequential Room\n`;
+    if(strat==="Sequential" && rows[i+1]){
+      text += `• ${op} | ${dur} To ${rows[i+1].children[0].value} | ${rows[i+1].children[1].value} Sequential Room\n`;
     } else {
       text += `• ${op} | ${dur} ${strat}\n`;
     }
@@ -281,7 +266,7 @@ function saveIntegration() {
   const blob = new Blob([summary.value], {type:'text/plain'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = practiceName.value || "IntegrationNote";
+  a.download = practiceName.value || "IntegrationNotes";
   a.click();
 }
 
