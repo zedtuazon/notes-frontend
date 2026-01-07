@@ -157,15 +157,19 @@ function addProvider(){
   providerGroup.className = "provider-group";
   providerGroup.innerHTML = `
     <input class="provider-name" placeholder="Provider Name">
+    <button class="deleteProviderBtn" style="margin-left:10px;">🗑 Delete Provider</button>
     <div class="config-group"></div>
     <button class="addOperatoryBtn">➕ Add Operatory</button>
   `;
   const configGroup = providerGroup.querySelector(".config-group");
   const addBtn = providerGroup.querySelector(".addOperatoryBtn");
+  const deleteBtn = providerGroup.querySelector(".deleteProviderBtn");
+
   addBtn.onclick = ()=>addOperatoryRow(configGroup,false);
+  deleteBtn.onclick = ()=>providerGroup.remove();
 
   providersContainer.appendChild(providerGroup);
-  addOperatoryRow(configGroup,false);
+  addOperatoryRow(configGroup,false); // first operatory row
 }
 
 /* Calendar Sync toggle */
