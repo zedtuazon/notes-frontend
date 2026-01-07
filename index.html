@@ -129,10 +129,10 @@
 </div>
 
 <label class="section">Blocker</label>
-<textarea id="blocker" placeholder="- "></textarea>
+<textarea id="blocker" placeholder="• "></textarea>
 
 <label class="section">Setup Summary</label>
-<textarea id="setupSummary" placeholder="- Calendar sync completed"></textarea>
+<textarea id="setupSummary" placeholder="• "></textarea>
 
 <div class="actions">
   <button id="copyBtn" disabled>📋 Copy to Clipboard</button>
@@ -157,10 +157,10 @@ const copyBtn = document.getElementById("copyBtn");
 const saveFileBtn = document.getElementById("saveFileBtn");
 const gptFixBtn = document.getElementById("gptFixBtn");
 
-/* Dropdown builders */
+/* Duration dropdown with 'minutes' */
 function durationDropdown(){
   let html = `<select class="duration"><option value="">Duration</option>`;
-  for(let i=5;i<=120;i+=5) html += `<option>${i} mins</option>`;
+  for(let i=5;i<=120;i+=5) html += `<option>${i} minutes</option>`;
   return html + `</select>`;
 }
 
@@ -220,6 +220,31 @@ document.querySelectorAll('input[name="calendarSync"]').forEach(r=>{
   };
 });
 
+/* Auto-bullets for Blocker and Setup Summary */
+function enableAutoBullets(textarea){
+  textarea.addEventListener("keydown", e=>{
+    if(e.key === "Enter"){
+      e.preventDefault();
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      textarea.value = textarea.value.slice(0, start) + "\n• " + textarea.value.slice(end);
+      textarea.selectionStart = textarea.selectionEnd = start + 3;
+    }
+  });
+
+  textarea.addEventListener("blur", ()=>{
+    textarea.value = textarea.value
+      .split("\n")
+      .map(l=>l.trim())
+      .filter(Boolean)
+      .map(l=>l.startsWith("•") ? l : "• " + l)
+      .join("\n");
+  });
+}
+
+enableAutoBullets(blocker);
+enableAutoBullets(setupSummary);
+
 /* Generate full note with combined sequential rows */
 function generateCurrentNote(){
   const serverAccess = document.querySelector('input[name="serverAccess"]:checked')?.value || "Not set";
@@ -234,17 +259,16 @@ function generateCurrentNote(){
     while(i < rows.length){
       const row = rows[i];
       const op = row.querySelector("input")?.value || "";
-      const dur = row.querySelector(".duration")?.value.replace("mins","minutes") || "";
+      const dur = row.querySelector(".duration")?.value || "";
       const strat = row.querySelector(".strategy")?.value || "";
 
-      // Sequential logic
       if(strat === "Sequential"){
         const nextRow = rows[i+1];
         if(nextRow){
           const nextOp = nextRow.querySelector("input")?.value || "";
-          const nextDur = nextRow.querySelector(".duration")?.value.replace("mins","minutes") || "";
+          const nextDur = nextRow.querySelector(".duration")?.value || "";
           result.push(`${op} ${dur} to ${nextOp} ${nextDur} | Sequential Room`);
-          i += 2; // skip next row
+          i += 2;
           continue;
         } else {
           result.push(`${op} ${dur} | Sequential Room`);
@@ -341,7 +365,6 @@ gptFixBtn.onclick = async()=>{
 document.querySelectorAll('input[name="serverAccess"], input[name="calendarSync"]').forEach(r=>{
   r.addEventListener("change", validateFields);
 });
-
 </script>
 </body>
 </html>
