@@ -4,18 +4,16 @@
 <meta charset="UTF-8">
 <title>EZ Note Generator</title>
 <style>
-body { font-family: Arial; max-width: 860px; margin: auto; padding: 18px; font-size: 14px; background:#fdfdfd; }
+body { font-family: Arial; max-width: 900px; margin: auto; padding: 18px; font-size: 14px; background:#fdfdfd; }
 .header { display: flex; justify-content: center; align-items: center; gap: 10px; font-size: 28px; font-weight: bold; margin-bottom: 16px; }
 .header span.icon { font-size: 32px; }
 
-/* Tab Buttons */
 .note-type-buttons { display:flex; gap:8px; justify-content:center; margin-bottom:16px; }
 .note-type-buttons button { padding:6px 12px; font-size:14px; border-radius:4px; border:1px solid #ccc; background:#f7f7f7; cursor:pointer; transition:all 0.2s; }
 .note-type-buttons button.active { background:#4a90e2; color:white; border-color:#4a90e2; }
 .note-type-section { display:none; }
 .note-type-section.active { display:block; }
 
-/* Form styling */
 label.section { font-weight: bold; margin-top: 12px; display: block; }
 input, select, textarea { padding:6px; margin-top:4px; font-size:14px; border:1px solid #ccc; border-radius:6px; }
 textarea { min-height:80px; width:100%; resize:vertical; }
@@ -35,8 +33,14 @@ select { max-width:260px; }
 .remove-btn:hover { background:#e0e0e0; }
 button:disabled { background:#f0f0f0; cursor:not-allowed; }
 .actions { display:flex; gap:10px; margin-top:14px; }
-.disabled { background:#f0f0f0; pointer-events:none; }
 #practiceName { width:100%; height:34px; padding:6px; font-size:14px; border-radius:6px; border:1px solid #ccc; box-sizing:border-box; }
+
+/* ======================= Onboarding Insurance UI ======================= */
+.insurance-container { margin-left:20px; margin-top:6px; }
+.insurance-item { display:flex; align-items:center; gap:12px; margin-bottom:4px; }
+.insurance-item span.bullet { font-weight:bold; margin-right:4px; }
+.insurance-item label { display:inline-flex; align-items:center; gap:4px; font-weight: normal; }
+.insurance-item input[type=radio] { margin:0; }
 </style>
 </head>
 <body>
@@ -45,7 +49,6 @@ button:disabled { background:#f0f0f0; cursor:not-allowed; }
   <span class="icon">📝</span> EZ Note Generator
 </div>
 
-<!-- Tab Buttons -->
 <div class="note-type-buttons">
   <button id="btnIntegrationNote" class="active">Integration Note</button>
   <button id="btnCalendarNote">Calendar/Resync Notes</button>
@@ -54,10 +57,10 @@ button:disabled { background:#f0f0f0; cursor:not-allowed; }
 
 <!-- ==================== Integration Notes ==================== -->
 <div id="sectionIntegrationNote" class="note-type-section active">
-
+  <!-- Practice Name -->
   <label class="section">Practice Name</label>
   <input id="practiceName" placeholder="Enter Practice Name (for file name only)">
-
+  <!-- Integration Type -->
   <label class="section">Integration Type</label>
   <select id="integrationType">
     <option value="" selected disabled>Select Integration Type</option>
@@ -68,13 +71,13 @@ button:disabled { background:#f0f0f0; cursor:not-allowed; }
     <option>Denticon API</option>
     <option>Opendental API</option>
   </select>
-
+  <!-- Contact Info -->
   <label class="section">Contact Info</label>
   <div class="contact-row">
     <input id="contactName" placeholder="Contact Name">
     <input id="phoneNumber" placeholder="Phone Number">
   </div>
-
+  <!-- Integration Status -->
   <label class="section">Integration Status</label>
   <select id="integrationStatus">
     <option value="" selected disabled>Select status</option>
@@ -82,44 +85,43 @@ button:disabled { background:#f0f0f0; cursor:not-allowed; }
     <option>Active</option>
     <option>Stalled</option>
   </select>
-
+  <!-- Server Access -->
   <label class="section">Server Access</label>
   <div class="radio-group">
     <label><input type="radio" name="serverAccess" value="Yes"><span class="yes">✔</span>Yes</label>
     <label><input type="radio" name="serverAccess" value="No"><span class="no">✖</span>No</label>
   </div>
-
+  <!-- Calendar Sync -->
   <label class="section">Calendar Sync Configured</label>
   <div class="radio-group">
     <label><input type="radio" name="calendarSync" value="Yes"><span class="yes">✔</span>Yes</label>
     <label><input type="radio" name="calendarSync" value="No"><span class="no">✖</span>No</label>
   </div>
-
+  <!-- Configs / Operatory -->
   <label class="section">Configs / Operatory Setup</label>
   <div id="configsContainer"></div>
   <button id="addOperatoryBtn" onclick="addConfig()">➕ Add Operatory</button>
-
+  <!-- Blocker -->
   <label class="section">Blocker</label>
   <textarea id="blocker" placeholder="• "></textarea>
-
+  <!-- Setup Summary -->
   <label class="section">Setup Summary</label>
   <textarea id="setupSummary" placeholder="• Calendar sync completed"></textarea>
-
+  <!-- Actions -->
   <div class="actions">
     <button id="copyBtn" disabled>📋 Copy to Clipboard</button>
     <button id="gptFixBtn">✏️ Fix Grammar</button>
     <button id="saveFileBtn" disabled>💾 Save to File</button>
   </div>
   <button style="margin-top:10px;" onclick="clearAll()">🧹 Clear All</button>
-
 </div>
 
-<!-- ==================== Calendar/Resync Notes (empty) ==================== -->
+<!-- ==================== Calendar/Resync Notes ==================== -->
 <div id="sectionCalendarNote" class="note-type-section"></div>
 
 <!-- ==================== Onboarding Notes ==================== -->
 <div id="sectionOnboardingNote" class="note-type-section">
-
+  <!-- Contact Info -->
   <div class="contact-row">
     <label style="width:140px;">Main Contact Name:</label>
     <input id="onboardContactName" placeholder="Main Contact Name">
@@ -137,38 +139,40 @@ button:disabled { background:#f0f0f0; cursor:not-allowed; }
     <input id="onboardTechAbility" placeholder="Tech Ability">
   </div>
 
+  <!-- Insurance Added -->
   <label class="section">Insurances Added</label>
-  <div id="insuranceContainer" style="margin-left:20px;">
-    <div>• Aetna Dental PPO/Basic/Advantage:
+  <div class="insurance-container">
+    <div class="insurance-item"><span class="bullet">•</span>Aetna Dental PPO/Basic/Advantage
       <label><input type="radio" name="insuranceAetna" value="Yes">Yes</label>
       <label><input type="radio" name="insuranceAetna" value="No">No</label>
     </div>
-    <div>• Cigna Dental PPO:
+    <div class="insurance-item"><span class="bullet">•</span>Cigna Dental PPO
       <label><input type="radio" name="insuranceCigna" value="Yes">Yes</label>
       <label><input type="radio" name="insuranceCigna" value="No">No</label>
     </div>
-    <div>• Delta Dental PPO:
+    <div class="insurance-item"><span class="bullet">•</span>Delta Dental PPO
       <label><input type="radio" name="insuranceDelta" value="Yes">Yes</label>
       <label><input type="radio" name="insuranceDelta" value="No">No</label>
     </div>
-    <div>• Delta Dental Premier:
+    <div class="insurance-item"><span class="bullet">•</span>Delta Dental Premier
       <label><input type="radio" name="insuranceDeltaPremier" value="Yes">Yes</label>
       <label><input type="radio" name="insuranceDeltaPremier" value="No">No</label>
     </div>
-    <div>• Guardian Dental PPO:
+    <div class="insurance-item"><span class="bullet">•</span>Guardian Dental PPO
       <label><input type="radio" name="insuranceGuardian" value="Yes">Yes</label>
       <label><input type="radio" name="insuranceGuardian" value="No">No</label>
     </div>
-    <div>• Metlife My Dental PPO/PDP Plus:
+    <div class="insurance-item"><span class="bullet">•</span>Metlife My Dental PPO/PDP Plus
       <label><input type="radio" name="insuranceMetlife" value="Yes">Yes</label>
       <label><input type="radio" name="insuranceMetlife" value="No">No</label>
     </div>
-    <div>• UnitedHealthcare Dental PPO:
+    <div class="insurance-item"><span class="bullet">•</span>UnitedHealthcare Dental PPO
       <label><input type="radio" name="insuranceUnited" value="Yes">Yes</label>
       <label><input type="radio" name="insuranceUnited" value="No">No</label>
     </div>
   </div>
 
+  <!-- Other fields -->
   <label class="section">Integration Eligible</label>
   <input id="onboardIntegrationEligible" placeholder="Integration Eligible">
 
@@ -210,10 +214,7 @@ button:disabled { background:#f0f0f0; cursor:not-allowed; }
 </div>
 
 <script>
-// =================== JS logic for tabs and buttons (Integration + Onboarding) ===================
-const BACKEND_URL = "https://notes-backend-yheh.onrender.com";
-
-// Tab switching
+// =================== JS logic for tab switching and validation ===================
 const tabs = [
   {btn:'btnIntegrationNote', section:'sectionIntegrationNote'},
   {btn:'btnCalendarNote', section:'sectionCalendarNote'},
@@ -221,14 +222,69 @@ const tabs = [
 ];
 tabs.forEach(t=>{
   document.getElementById(t.btn).onclick=()=>{
-    tabs.forEach(tt=>{document.getElementById(tt.btn).classList.remove('active'); document.getElementById(tt.section).classList.remove('active');});
+    tabs.forEach(tt=>{
+      document.getElementById(tt.btn).classList.remove('active');
+      document.getElementById(tt.section).classList.remove('active');
+    });
     document.getElementById(t.btn).classList.add('active');
     document.getElementById(t.section).classList.add('active');
+    validateIntegrationFields();
+    validateOnboardFields();
   };
 });
 
-// ✅ All bullet points use • throughout Integration and Onboarding Notes
-// The rest of the JS (Integration Notes add/remove configs, sequential logic, copy/save/fix grammar, Onboarding Notes) remains the same as previous full code.
+// =================== Integration Notes validation ===================
+function validateIntegrationFields(){
+  const section = document.getElementById("sectionIntegrationNote");
+  if(!section.classList.contains("active")) return;
+
+  const practice = document.getElementById("practiceName").value.trim();
+  const type = document.getElementById("integrationType").value;
+  const contact = document.getElementById("contactName").value.trim();
+  const phone = document.getElementById("phoneNumber").value.trim();
+  const status = document.getElementById("integrationStatus").value;
+  const server = document.querySelector('input[name="serverAccess"]:checked')?.value;
+  const calendar = document.querySelector('input[name="calendarSync"]:checked')?.value;
+  const configsContainer = document.getElementById("configsContainer");
+
+  let configsFilled = true;
+  if(calendar==="Yes"){
+    const rows = configsContainer.querySelectorAll(".config-row");
+    configsFilled = rows.length>0 && Array.from(rows).every(r=>{
+      const op = r.querySelector("input")?.value.trim();
+      const dur = r.querySelector(".duration")?.value;
+      return op && dur;
+    });
+  }
+
+  const allFilled = practice && type && contact && phone && status && server && calendar && configsFilled;
+  document.getElementById("copyBtn").disabled = !allFilled;
+  document.getElementById("saveFileBtn").disabled = !allFilled;
+}
+
+// =================== Onboarding Notes validation ===================
+const onboardFields={
+  contactName: document.getElementById("onboardContactName"),
+  sentiment: document.getElementById("onboardSentiment"),
+  techAbility: document.getElementById("onboardTechAbility"),
+  phoneNumber: document.getElementById("onboardPhoneNumber")
+};
+const onboardCopyBtn=document.getElementById("onboardCopyBtn");
+const onboardSaveFileBtn=document.getElementById("onboardSaveFileBtn");
+
+function validateOnboardFields(){
+  const section=document.getElementById("sectionOnboardingNote");
+  if(!section.classList.contains("active")) return;
+
+  const requiredFilled = onboardFields.contactName.value &&
+                         onboardFields.sentiment.value &&
+                         onboardFields.techAbility.value &&
+                         onboardFields.phoneNumber.value;
+  onboardCopyBtn.disabled=!requiredFilled;
+  onboardSaveFileBtn.disabled=!requiredFilled;
+}
+Object.values(onboardFields).forEach(f=>f.addEventListener("input",validateOnboardFields));
+document.querySelectorAll('#sectionOnboardingNote input[type="radio"]').forEach(r=>r.addEventListener("change",validateOnboardFields));
 
 </script>
 </body>
