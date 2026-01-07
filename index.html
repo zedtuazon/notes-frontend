@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <title>EZ Note Generator</title>
 <style>
-body { font-family: Arial; max-width: 860px; margin: auto; padding: 18px; font-size: 14px; background:#fdfdfd; }
+body { font-family: Arial; max-width: 900px; margin: auto; padding: 18px; font-size: 14px; background:#fdfdfd; }
 label.section { font-weight: bold; margin-top: 12px; display: block; }
 input, select, textarea { padding: 6px; margin-top: 4px; font-size: 14px; border: 1px solid #ccc; border-radius: 6px; }
 textarea { min-height: 80px; width: 100%; resize: vertical; }
@@ -16,7 +16,8 @@ select { max-width: 260px; }
 .yes { color: green; font-weight: bold; }
 .no { color: red; font-weight: bold; }
 
-.config-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+.provider-group { margin-top: 12px; padding: 6px 0; border-bottom: 1px solid #ddd; }
+.config-row { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
 .config-row input { width: 40%; }
 .config-row select.duration { width: 100px; }
 .config-row select.strategy { width: 140px; }
@@ -27,10 +28,12 @@ button:disabled { background:#f0f0f0; cursor:not-allowed; }
 .actions { display: flex; gap: 10px; margin-top: 14px; }
 .header { display: flex; justify-content: center; align-items: center; gap: 10px; font-size: 28px; font-weight: bold; margin-bottom: 16px; }
 #practiceName { width: 100%; height: 34px; box-sizing: border-box; }
-#configsSection { display: none; margin-top: 4px; }
+#configsSection { display: none; margin-top: 8px; }
+hr { border: 0; border-top: 1px solid #eee; margin: 12px 0; }
 </style>
 </head>
 <body>
+
 <div class="header">📝 EZ Note Generator</div>
 
 <label class="section">Practice Name</label>
@@ -74,9 +77,8 @@ button:disabled { background:#f0f0f0; cursor:not-allowed; }
 </div>
 
 <div id="configsSection">
-  <label class="section">Configs / Operatory Setup</label>
-  <div id="configsContainer"></div>
-  <button onclick="addConfig()">➕ Add Operatory</button>
+  <div id="providersContainer"></div>
+  <button onclick="addProvider()">➕ Add Provider</button>
 </div>
 
 <label class="section">Blocker</label>
@@ -95,7 +97,7 @@ button:disabled { background:#f0f0f0; cursor:not-allowed; }
 
 <script>
 const BACKEND_URL = "https://notes-backend-yheh.onrender.com";
-const configsContainer = document.getElementById("configsContainer");
+const providersContainer = document.getElementById("providersContainer");
 const configsSection = document.getElementById("configsSection");
 const integrationType = document.getElementById("integrationType");
 const integrationStatus = document.getElementById("integrationStatus");
@@ -123,36 +125,47 @@ function strategyDropdown(){
   </select>`;
 }
 
-/* Add Config Row with Providers */
-function addConfig(isSequentialSecond=false){
+/* Add Operatory Row */
+function addOperatoryRow(container, isSequential=false){
   const row = document.createElement("div");
   row.className = "config-row";
-
   row.innerHTML = `
-    <input placeholder="Providers">
     <input placeholder="Column / Operatory">
     ${durationDropdown()}
-    ${isSequentialSecond ? "" : strategyDropdown()}
-    <span class="arrow" style="display:${isSequentialSecond?'inline':'none'}">→</span>
+    ${isSequential ? "" : strategyDropdown()}
+    <span class="arrow" style="display:${isSequential?'inline':'none'}">→</span>
     <button class="remove-btn">✕</button>
   `;
-
   const strategy = row.querySelector(".strategy");
   const arrow = row.querySelector(".arrow");
 
-  row.querySelector(".remove-btn").onclick = () => row.remove();
+  row.querySelector(".remove-btn").onclick = ()=>row.remove();
 
   if(strategy){
-    strategy.onchange = () => {
-      if(strategy.value === "Sequential"){
-        arrow.style.display = "inline";
-        addConfig(true);
-      } else arrow.style.display = "none";
+    strategy.onchange = ()=>{
+      if(strategy.value==="Sequential"){ arrow.style.display="inline"; addOperatoryRow(container,true); }
+      else arrow.style.display="none";
     };
   }
 
-  configsContainer.appendChild(row);
-  validateFields();
+  container.appendChild(row);
+}
+
+/* Add Provider Group */
+function addProvider(){
+  const providerGroup = document.createElement("div");
+  providerGroup.className = "provider-group";
+  providerGroup.innerHTML = `
+    <input class="provider-name" placeholder="Provider Name">
+    <div class="config-group"></div>
+    <button class="addOperatoryBtn">➕ Add Operatory</button>
+  `;
+  const configGroup = providerGroup.querySelector(".config-group");
+  const addBtn = providerGroup.querySelector(".addOperatoryBtn");
+  addBtn.onclick = ()=>addOperatoryRow(configGroup,false);
+
+  providersContainer.appendChild(providerGroup);
+  addOperatoryRow(configGroup,false);
 }
 
 /* Calendar Sync toggle */
@@ -160,11 +173,10 @@ document.querySelectorAll('input[name="calendarSync"]').forEach(r=>{
   r.onchange = () => {
     if(r.value === "Yes"){
       configsSection.style.display = "block";
-      configsContainer.innerHTML = "";
-      addConfig();
+      if(providersContainer.children.length===0) addProvider();
     } else {
       configsSection.style.display = "none";
-      configsContainer.innerHTML = "";
+      providersContainer.innerHTML = "";
     }
     validateFields();
   };
@@ -200,35 +212,33 @@ function generateCurrentNote(){
 
   let configsText = "• N/A";
   if(calendarSync === "Yes"){
-    const rows = [...document.querySelectorAll(".config-row")];
-    let result = [];
-    let i = 0;
-    while(i < rows.length){
-      const row = rows[i];
-      const provider = row.querySelectorAll("input")[0]?.value || "";
-      const operatory = row.querySelectorAll("input")[1]?.value || "";
-      const dur = row.querySelector(".duration")?.value || "";
-      const strat = row.querySelector(".strategy")?.value || "";
+    configsText = "";
+    const providerGroups = [...document.querySelectorAll(".provider-group")];
+    providerGroups.forEach(group=>{
+      const providerName = group.querySelector(".provider-name")?.value || "";
+      if(!providerName) return;
+      configsText += providerName + ":\n";
 
-      if(strat === "Sequential"){
-        const nextRow = rows[i+1];
-        if(nextRow){
-          const nextOperatory = nextRow.querySelectorAll("input")[1]?.value || "";
+      const rows = [...group.querySelectorAll(".config-row")];
+      let i = 0;
+      while(i < rows.length){
+        const row = rows[i];
+        const operatory = row.querySelector("input")?.value || "";
+        const dur = row.querySelector(".duration")?.value || "";
+        const strat = row.querySelector(".strategy")?.value || "";
+
+        if(strat==="Sequential" && rows[i+1]){
+          const nextRow = rows[i+1];
+          const nextOperatory = nextRow.querySelector("input")?.value || "";
           const nextDur = nextRow.querySelector(".duration")?.value || "";
-          const line = `${operatory} ${dur} to ${nextOperatory} ${nextDur} | Sequential Room`;
-          result.push(`${provider}:\n    ${line}`);
-          i+=2;
-          continue;
+          configsText += `    ${operatory} ${dur} to ${nextOperatory} ${nextDur} | Sequential Room\n`;
+          i+=2; continue;
         }
-      }
 
-      // Non-sequential row
-      let line = `${operatory} ${dur}`;
-      if(strat) line += ` | ${strat.replace("s","")} Room`;
-      result.push(`${provider}:\n    ${line}`);
-      i++;
-    }
-    configsText = result.join("\n");
+        configsText += `    ${operatory} ${dur}` + (strat?` | ${strat.replace("s","")} Room`:"") + "\n";
+        i++;
+      }
+    });
   }
 
   return `
@@ -257,7 +267,7 @@ function clearAll(){
   document.querySelectorAll("input").forEach(i=>i.type==="radio"?i.checked=false:i.value="");
   document.querySelectorAll("textarea").forEach(t=>t.value="");
   document.querySelectorAll("select").forEach(s=>s.selectedIndex=0);
-  configsContainer.innerHTML="";
+  providersContainer.innerHTML="";
   configsSection.style.display="none";
   validateFields();
 }
@@ -306,5 +316,6 @@ gptFixBtn.onclick = async()=>{
 [integrationType,integrationStatus,contactName,phoneNumber,blocker,setupSummary].forEach(el=>el.addEventListener("input",validateFields));
 document.querySelectorAll('input[name="serverAccess"],input[name="calendarSync"]').forEach(r=>r.addEventListener("change",validateFields));
 </script>
+
 </body>
 </html>
